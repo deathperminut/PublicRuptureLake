@@ -176,6 +176,7 @@ def init_web_routes(app):
                 'longitud': longitud,
                 'volumen': round(fila['volumen'], 2),
                 'Volumenfugado': round(fila['volumen_fuga'], 2),
+                'vol_muerto': round(fila['volumen_muerto'], 2),
                 'presion_atmos': round(fila['presion_atmos'], 2),
                 'flujo': round(fila['flujo'], 2),
                 'horas': horas,
