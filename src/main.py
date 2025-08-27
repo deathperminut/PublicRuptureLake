@@ -14,29 +14,30 @@ load_dotenv()
 ### FUNCIONES MONGODB ########
 ##############################
 
-from functions.users import createUser,deleteUser,updateUser,getUsers,loginUserV2
+from functions.users import createUser,deleteUser,updateUser,getUsers,loginUserV2,hash_password
 from functions.events import createEvent,deleteEvent,updateEvent,getEvents,getSpecificEvent
 import pandas as pd
 import bcrypt
 
+# Importar rutas web
+from web.routes import init_web_routes
+
 ### DEFINIMOS EL SERVIDOR
-app = Flask(__name__)
+app = Flask(__name__, 
+            template_folder='web/templates',
+            static_folder='web/static')
 CORS(app)
 
 # Configurar Flask con variables de entorno
 app.config['DEBUG'] = os.getenv('FLASK_DEBUG') == 'True'
 
+# Inicializar rutas web
+init_web_routes(app)
+
 
 ####################################
 ############# USERS ################
 ####################################
-def hash_password(password):
-    # Genera un salt y hashea la contraseña
-    salt = bcrypt.gensalt()
-    hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
-    return hashed_password
-
-
 
 @app.route('/rupture/getUsers', methods=['GET'])
 
@@ -52,14 +53,10 @@ def GetUsers():
     return jsonify(lista_items)
 
 @app.route('/rupture/createUser', methods=['POST'])
-
 def CreateUser():
-
     data = request.json
-    data['password'] = hash_password(data['password'])
     response = createUser(data)
-
-    return response ,201
+    return response, 201
 
 
 
@@ -114,7 +111,6 @@ def LoginV2():
 ##########################
 
 @app.route('/rupture/getEvents', methods=['GET'])
-
 def GetEvents():
     response = getEvents()
     data = list(response)
@@ -140,23 +136,14 @@ def GetSpecificEvent():
             lista_items.append(item)
         return {'status':'Si hay elemento','info':lista_items[0]}
 
-
-
 @app.route('/rupture/createEvent', methods=['POST'])
-
 def CreateEvent():
-
     data = request.json
     response = createEvent(data)
-
     return response ,201
 
-
-
 @app.route('/rupture/deleteEvent', methods=['POST'])
-
 def DeleteEvent():
-
     data = request.json
     response = deleteEvent(data)
     if response.deleted_count == 1 :
@@ -167,9 +154,7 @@ def DeleteEvent():
         status_code = 400
     return jsonify(response), status_code
 
-
 @app.route('/rupture/updateEvent',methods= ['POST'])
-
 def UpdateEvent():
     data = request.json
     result =  updateEvent(data)
@@ -180,6 +165,7 @@ def UpdateEvent():
         response = {"success": False, "message": "No fue posible actualizar el elemento"}
         status_code = 200
     return jsonify(response), status_code
+
 
 
 

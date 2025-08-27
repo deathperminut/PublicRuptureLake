@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <title>Nuevo Evento</title>
+    <meta property="og:title" content="Nuevo Evento" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8" />
+    <meta property="twitter:card" content="summary_large_image" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/evento.css') }}" />
+
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&amp;display=swap"
+      data-tag="font"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&amp;display=swap"
+      data-tag="font"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&amp;display=swap"
+      data-tag="font"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&amp;display=swap"
+      data-tag="font"
+    />
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+    <script src="https://kit.fontawesome.com/697919b5b5.js" crossorigin="anonymous"></script>
+    <!-- Bootstrap-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <script type="text/javascript">
+      function mostrar_campos() {
+        if(document.getElementById('forma_circ').checked) {
+          document.getElementById('diametros').style.display = "grid";
+          if(document.getElementById('diameEqui').checked) {
+            document.getElementById("div_escape").style.display = "flex";
+            document.getElementById("div_diameFuga").style.display = "none";
+            document.getElementById("DiameFuga").required = false;
+            document.getElementById("div_longiFuga").style.display = "none";
+            document.getElementById("LongiFuga").required = false;
+          }
+          else {
+            document.getElementById("div_escape").style.display = "none";
+            document.getElementById("div_diameFuga").style.display = "flex";
+            document.getElementById("DiameFuga").required = true;
+            document.getElementById("div_longiFuga").style.display = "none";
+            document.getElementById("div_longiFuga").required = false;
+          }
+        }
+        else if(document.getElementById('forma_recta').checked) {
+          document.getElementById('diametros').style.display = "grid";
+          if(document.getElementById('diameEqui').checked) {
+            document.getElementById("div_escape").style.display = "flex";
+            document.getElementById("div_diameFuga").style.display = "none";
+            document.getElementById("DiameFuga").required = false;
+            document.getElementById("div_longiFuga").style.display = "none";
+            document.getElementById("LongiFuga").required = false;
+          }
+          else {
+            document.getElementById("div_escape").style.display = "none";
+            document.getElementById("div_diameFuga").style.display = "none";
+            document.getElementById("DiameFuga").required = false;
+            document.getElementById("div_longiFuga").style.display = "flex";
+            document.getElementById("div_longiFuga").required = true;
+          }
+        }
+        else {
+          document.getElementById('diametros').style.display = "none";
+          document.getElementById("div_escape").style.display = "none";
+          document.getElementById("div_diameFuga").style.display = "none";
+          document.getElementById("DiameFuga").required = false;
+          document.getElementById("div_longiFuga").style.display = "none";
+          document.getElementById("LongiFuga").required = false;
+        }
+      }
+      function mostrar_distancia() {
+        if(document.getElementById("flujo_bi").checked) {
+          document.getElementById("Tube2").style.display = "grid";
+          document.getElementById("DistTube2").required = true;
+        }
+        else {
+          document.getElementById("Tube2").style.display = "none";
+          document.getElementById("DistTube2").required = false;
+        }
+      }
+  </script>
+  </head>
+
+  <body onload="fechas_max()" style="background-image: url('{{ url_for('static', filename='images/Fondo.png') }}')">
+    <div class="evento-header">
+      <div class="evento-app-container">
+        <form method="GET" action="Inicio">
+          <button type="submit" class="evento-button button">
+            <i class="fa fa-right-from-bracket"></i>
+          </button>
+        </form>
+        <img
+          alt="Logo FuGas"
+          src="{{ url_for('static', filename='images/logos/RL_logo.png') }}"
+          class="evento-app-logo"
+          onclick="window.location.href ='Perfil';"
+        />
+      </div>
+    </div>
+
+    <div class="evento-container">
+      <form class="evento-forma" method="POST" action="Resultados" onsubmit="return confirm('¿Reportar evento?');">
+        <div class="grid">
+          <div class="Subgrid1">
+            <label class="grid-titulo">Información general</label>
+            <div class="Evento-Numerodeorden">
+              <label for="orden" class="Evento-label1">Número de orden:</label>
+              <input type="text" id="orden" name="orden" required="" class="evento-txt-orden" />
+            </div>
+            <div class="Evento-Numerodeorden">
+              <label for="ubicacion" class="Evento-label1">Ubicación:</label>
+              <div class="inputUbi">
+                <input type="text" id="ubicacion" name="ubicacion" required="" class="evento-txt-ubica" autocomplete="on"    />
+                <button type="button" class="evento-button1 button buttonCustomUbi" onclick="obtenerUbicacion()"><i class="fa fa-location-dot positionIcon"></i></button>
+              </div>
+            </div>
+            <div class="Evento-Numerodeorden">
+              <label for="tiempoInicio" class="Evento-label1">Fecha y hora de inicio de fuga:</label>
+              <input
+                type="datetime-local"
+                id="tiempoInicio"
+                name="tiempoInicio"
+                class="evento-txt-fecha"
+                pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}"
+                onfocus="fechas_max();this.showPicker();habilitar_fin()"
+                oninput="habilitar_fin()"
+              />
+            </div>
+            <div class="Evento-Numerodeorden">
+              <label for="tiempoFin" class="Evento-label1">Fecha y hora de fin de fuga:</label>
+              <input
+                type="datetime-local"
+                id="tiempoFin"
+                name="tiempoFin"
+                pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}"
+                onfocus="fechas_max();this.showPicker()"
+                class="evento-txt-fecha"
+              />
+            </div>
+            <div class="Evento-Numerodeorden">
+              <label for="presion" class="Evento-label1">Presión de tubería:</label>
+              <div>
+                <input id="presion" name="presion" type="number" required="" step="0.01" min="0.01" class="evento-txt-diametro" />
+                <select id="presionUni" name="presionUni" class="evento-presion-uni">
+                  <option value="psig" selected="">psig</option>
+                  <option value="bar">bar</option>
+                </select>
+              </div>
+            </div>
+            <div class="Evento-Numerodeorden">
+              <label for="DiameTube" class="Evento-label1">Diámetro de tubería:</label>
+              <select name="DiameTube" id="DiameTube" required="" onchange="habilitar_diametro()" class="evento-txt-diametro">
+                <!-- pulgadas Polietileno-->
+                  <option value="0.5">1/2in - Polietileno</option> <!-- 0-->
+                <option value="0.75">3/4in - Polietileno</option> <!-- 1-->
+                <option value="1">1in - Polietileno</option> <!-- 2-->
+                <option value="1.25">1 1/2in - Polietileno</option> <!-- 3-->
+                <option value="1.5">1 1/2in - Polietileno</option> <!-- 4-->
+                <option value="2">2in - Polietileno</option> <!-- 5-->
+                <option value="2.5">2 1/2in - Polietileno</option> <!-- 6-->
+                <option value="3">3in - Polietileno</option> <!-- 7-->
+                <option value="4">4in - Polietileno</option> <!-- 8-->
+                <option value="6">6in - Polietileno</option> <!-- 9-->
+                  <option value="8">8in - Polietileno</option> <!-- 10-->
+
+                  <!-- milimetros Polietileno-->
+                  <option value="21">21mm - Polietileno</option> <!-- 11-->
+                  <option value="26">26mm - Polietileno</option> <!-- 11-->
+                <option value="33">33mm - Polietileno</option> <!-- 12-->
+                <option value="42">42mm - Polietileno</option> <!-- 13-->
+                <option value="48">48mm - Polietileno</option> <!-- 14-->
+                <option value="60">60mm - Polietileno</option> <!-- 15-->
+                <option value="73">73mm - Polietileno</option> <!-- 16-->
+                <option value="88">88mm - Polietileno</option> <!-- 17-->
+                <option value="114">114mm - Polietileno</option> <!-- 18-->
+                <option value="168">168mm - Polietileno</option> <!-- 19-->
+                  <option value="200">200mm - Polietileno</option> <!-- 20-->
+
+                  <!-- Pulgadas Acero-->
+                  <option value="0.501">1/2in - Acero</option> <!-- 21-->
+                  <option value="0.751">3/4in - Acero</option> <!-- 22-->
+                  <option value="1.001">1in - Acero</option> <!-- 23-->
+                  <option value="1.251">1 1/4in - Acero</option> <!-- 24-->
+                  <option value="1.501">1 1/2in - Acero</option> <!-- 25-->
+                  <option value="2.001">2in - Acero</option> <!-- 26-->
+                  <option value="2.501">2 1/2in - Acero</option> <!-- 27-->
+                  <option value="3.001">3in - Acero</option> <!-- 28-->
+                  <option value="4.001">4in - Acero</option> <!-- 29-->
+                  <option value="6.001">6in - Acero</option> <!-- 30-->
+                  <option value="8.001">8in - Acero</option> <!-- 31-->
+                  <option value="10.001">10in - Acero</option> <!-- 32-->
+                  <option value="12.001">12in - Acero</option> <!-- 33-->
+                  <option value="14.001">14in - Acero</option> <!-- 34-->
+                  <option value="16.001">16in - Acero</option> <!-- 35 -->
+                  <option value="18.001">18in - Acero</option> <!-- 36-->
+                  <option value="20.001">20in - Acero</option> <!-- 37-->
+
+
+                  <!-- Milimetros Acero-->
+                  <option value="20">20mm - Acero</option> <!-- 41-->
+                  <option value="25">25mm - Acero</option> <!-- 41-->
+                  <option value="30">30mm - Acero</option> <!-- 42-->
+                  <option value="38">38mm - Acero</option> <!-- 43-->
+                  <option value="44.5">44.5mm - Acero</option> <!-- 44-->
+                  <option value="51">51mm - Acero</option> <!-- 45-->
+                  <option value="54">54mm - Acero</option> <!-- 46-->
+                  <option value="57">57mm - Acero</option> <!-- 47-->
+                  <option value="63.5">63.5mm - Acero</option> <!-- 48-->
+                  <option value="70">70mm - Acero</option> <!-- 49-->
+                  <option value="82.5">82.5mm - Acero</option> <!-- 50-->
+                  <option value="108">108mm - Acero</option> <!-- 51-->
+                  <option value="127">127mm - Acero</option> <!-- 52-->
+                  <option value="133">133mm - Acero</option> <!-- 53-->
+                  <option value="152">152mm - Acero</option> <!-- 54-->
+                  <option value="159">159mm - Acero</option> <!-- 55-->
+                  <option value="177.8">177.8mm - Acero</option> <!-- 56-->
+                  <option value="244.5">244.5mm - Acero</option> <!-- 57-->
+                  <option value="298.5">298.5mm - Acero</option> <!-- 58-->
+              </select>
+            </div>
+          </div>
+          <div class="Subgrid2">
+            <label class="grid-titulo">Características del evento</label>
+            <div class="Evento-Caracteristicas">
+              <label class="Evento-label2">Dirección del flujo:</label>
+              <ul class="evento-ul1 list">
+                <li class="evento-li2 list-item">
+                  <img
+                    alt="Flujo por izquierda"
+                    src="{{ url_for('static', filename='images/tube_flujo1-200h.png') }}"
+                    loading="eager"
+                    class="evento-image"
+                    onclick="document.getElementById('flujo_izq').checked=true;mostrar_distancia()"
+                  />
+                  <input type="radio" name="Flujo" id="flujo_izq" value="uni" checked="" onclick="mostrar_distancia()"/>
+                </li>
+                <li class="evento-li2 list-item">
+                  <img
+                    alt="Flujo bidireccional"
+                    src="{{ url_for('static', filename='images/tube_flujo3-200h.png') }}"
+                    loading="eager"
+                    class="evento-image"
+                    onclick="document.getElementById('flujo_bi').checked=true;mostrar_distancia()"
+                  />
+                  <input type="radio" name="Flujo" id="flujo_bi" value="bi" onclick="mostrar_distancia()"/>
+                </li>
+              </ul>
+            </div>
+            <div class="Evento-CaracteristicasV2">
+              <div class="Evento-CaracteristicasV2">
+                <label for="DistTube" class="Evento-label2 labelDistance">Distancia de la válvula:</label>
+                <div>
+                  <input
+                    type="number"
+                    id="DistTube"
+                    name="DistTube"
+                    class="evento-txt-presion"
+                    required=""
+                    min="0.01"
+                    step="0.01"
+                  />
+                  <select name="DistTubeUni" id="DistTubeUni" class="evento-presion-uni">
+                    <option value="m" selected="">m</option>
+                    <option value="ft">ft</option>
+                  </select>
+                </div>
+              </div>
+              <div id="Tube2" class="Evento-Caracteristicas4" style="display: none;">
+                <label for="DistTube2" class="Evento-label2">Distancia de 2da válvula:</label>
+                <div class="centerInput">
+                  <input
+                    type="number"
+                    id="DistTube2"
+                    name="DistTube2"
+                    class="evento-txt-presion"
+                    min="0.01"
+                    step="0.01"
+                  />
+                  <select name="DistTubeUni2" id="DistTubeUni2" class="evento-presion-uni">
+                    <option value="m" selected="">m</option>
+                    <option value="ft">ft</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="Evento-Caracteristicas">
+              <label class="Evento-label2">Naturaleza:</label>
+
+                <ul class="evento-ulu list">
+                  <li class="evento-li1 list-item">
+                    <input type="radio" name="subte" id="super" value="superficial" checked=""/>
+                    <span class="evento-text04">Superficial</span>
+                  </li>
+                  <li class="evento-li list-item">
+                    <input type="radio" name="subte" id="subte" value="subterranea"/>
+                    <span class="evento-text04">Subterránea</span>
+                  </li>
+                </ul>
+            </div>
+            <div class="Evento-Caracteristicas">
+              <label class="Evento-label2">Forma de la rotura:</label>
+                <ul class="evento-ul2 list">
+                  <li class="evento-li5 list-item">
+                    <img
+                      alt="Fuga circular"
+                      src="{{ url_for('static', filename='images/tube_circ-200h.png') }}"
+                      loading="eager"
+                      class="evento-image3"
+                      onclick="document.getElementById('forma_circ').checked=true;mostrar_campos()"
+                    />
+                    <input type="radio" name="Forma" id="forma_circ" value="circ" onclick="mostrar_campos()" />
+                  </li>
+                  <li class="evento-li8 list-item">
+                    <img
+                      alt="Fuga recta"
+                      src="{{ url_for('static', filename='images/tube_linea-200h.png') }}"
+                      loading="eager"
+                      class="evento-image3"
+                      onclick="document.getElementById('forma_recta').checked=true;mostrar_campos()"
+                    />
+                    <input type="radio" name="Forma" id="forma_recta" value="recta" onclick="mostrar_campos()"/>
+                  </li>
+                  <li class="evento-list-item1 list-item">
+                    <img
+                      alt="Fuga total"
+                      src="{{ url_for('static', filename='images/tube_total-200h.png') }}"
+                      loading="eager"
+                      class="evento-image3"
+                      onclick="document.getElementById('forma_total').checked=true;mostrar_campos()"
+                    />
+                    <input type="radio" name="Forma" id="forma_total" value="total" onclick="mostrar_campos()"/>
+                  </li>
+                </ul>
+            </div>
+            <div id="diametros" class="Evento-Caracteristicas2" style="display: none;">
+              <div class="Evento-Caracteristicas3">
+                <label class="Evento-label2">Diámetros equivalentes:</label>
+                <input type="checkbox" id="diameEqui" name="diameEqui" class="evento-check" onclick="mostrar_campos()"></input>
+              </div>
+              <div id="div_diameFuga" class="evento-container20" >  
+                <label class="Evento-label3">Diámetro aparente:</label>
+                <input type="number" id="DiameFuga" name="DiameFuga" min="0.01" class="evento-txt-diametro" step="0.01"/>
+                <select id="DiameFugaUni" name="DiameFugaUni" onchange="cambiarMaxDiame()" class="evento-presion-uni">
+                  <option value="mm" selected="">mm</option>
+                  <option value="in">in</option>
+                </select>
+              </div>
+              <div id="div_longiFuga" class="evento-container20" style="display: none;">
+                <label class="Evento-label3">Longitud:</label>
+                <input type="number" id="LongiFuga" name="LongiFuga" min="0.01" max="2000000" class="evento-txt-diametro" step="0.01"/>
+                <select id="LongiFugaUni" name="LongiFugaUni" class="evento-presion-uni">
+                  <option value="mm" selected="">mm</option>
+                  <option value="in">in</option>
+                </select>
+                <!-- <label class="Evento-label3">Ancho:</label>
+                <input type="number" id="Altofuga" name="Altofuga" min="0" max="2000000" class="evento-txt-diametro" step="0" title="AAAA"/>
+                <select id="AltofugaUni" name="AltofugaUni" class="evento-presion-uni">
+                  <option value="mm" selected="">mm</option>
+                  <option value="in">in</option>
+                </select> -->
+              </div>
+              <div id="div_escape" class="evento-container20" style="display: none;">
+                <label class="Evento-label3">Escape:</label>
+                <select id="escape" name="escape" class="evento-txt-diametro">
+                  <option value="min" selected="">Mínimo</option>
+                  <option value="parcial">Parcial</option>
+                  <option value="total">Total</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="evento-container26">
+          <label id="noOrden" class="evento-label">Orden ya existe</label>
+          <button type="submit" class="evento-button2 button">
+            Enviar
+          </button>
+        </div>
+      </form>
+      
+    </div>
+    
+    <!-- <div class="evento-footer">
+      <div class="evento-utp-container">
+        <img
+          src="static/images/logos/Logo_Gasostenible.png"
+          class="evento-gasostenible-logo"
+        />
+        <img
+          src="{{ url_for('static', filename='images/logos/Logo_UTP.png') }}"
+          class="evento-UTP-logo"
+        />
+        <img
+          src="{{ url_for('static', filename='images/logos/Logo_Genergetica.png') }}"
+          class="evento-genergetica-logo"
+        />
+        <img
+        src="{{ url_for('static', filename='images/logos/logo-taturgas.png') }}"
+        class="evento-main-logo"
+        />
+      </div>
+      <div class="evento-slogan-container">
+        <h1 class="evento-slogan">Gas natural<br>#UnaElecciónNatural</h1>
+      </div>
+    </div> -->
+  </body>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+  <script type="text/javascript">
+
+    function getCookie(cname) {
+      let name = cname + "=";
+      let decodedCookie = decodeURIComponent(document.cookie);
+      let ca = decodedCookie.split(';');
+      for(let i = 0; i <ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) == ' ') {
+          c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+          return c.substring(name.length, c.length);
+        }
+      }
+      return "";
+    }
+    
+    function fechas_max(){
+      var today = new Date();
+      var dd = today.getDate();
+      var mm = today.getMonth() + 1; //January is 0!
+      var yyyy = today.getFullYear();
+      var hh = today.getHours();
+      var min = today.getMinutes();
+      var hoy;
+
+      if (dd < 10) {
+        dd = '0' + dd;
+      }
+
+      if (mm < 10) {
+        mm = '0' + mm;
+      }
+
+      if (hh < 10) {
+        hh = '0' + hh;
+      }
+
+      if (min < 10) {
+        min = '0' + min;
+      }
+
+      hoy = yyyy + '-' + mm + '-' + dd + 'T' + hh + ':' + min;
+      document.getElementById("tiempoFin").setAttribute("max", hoy);
+      document.getElementById("tiempoInicio").setAttribute("max", hoy);
+    }
+
+    function habilitar_fin(){
+      var inicio = document.getElementById("tiempoInicio");
+      var fin = document.getElementById("tiempoFin");
+      if (inicio.value == null || inicio.value == ""){
+        fin.disabled = true;
+      }
+      else {
+        fin.min = inicio.value;
+        fin.disabled = false;
+      }
+    }
+
+    function habilitar_diametro(){
+      var tube = document.getElementById("DiameTube");
+      var Dfuga = document.getElementById("DiameFuga");
+      var Lfuga = document.getElementById("LongiFuga");
+      var Duni = document.getElementById("DiameFugaUni");
+      if (tube.selectedIndex == null){
+        Dfuga.disabled = true;
+        Lfuga.disabled = true;
+      }
+      else {
+        Dfuga.disabled = false;
+        Lfuga.disabled = false;
+        if (tube.selectedIndex <= 10){
+          Dfuga.setAttribute("max", convertirMax(tube.value, "in", Duni.value));
+        }
+        else if (tube.selectedIndex > 10 && tube.selectedIndex <= 21 ) {
+          Dfuga.setAttribute("max", convertirMax(tube.value, "mm", Duni.value));
+        }
+        else if (tube.selectedIndex > 21 && tube.selectedIndex <= 38 ) {
+          Dfuga.setAttribute("max", convertirMax(tube.value, "in", Duni.value));
+        }
+        else {
+          Dfuga.setAttribute("max", convertirMax(tube.value, "mm", Duni.value));
+        }
+      }
+    }
+
+    function cambiarMaxDiame(){
+      var tube = document.getElementById("DiameTube");
+      var Dfuga = document.getElementById("DiameFuga");
+      var Duni = document.getElementById("DiameFugaUni");
+      if (tube.selectedIndex <= 10){
+        Dfuga.setAttribute("max", convertirMax(tube.value, "in", Duni.value));
+      }
+      else if (tube.selectedIndex > 10 && tube.selectedIndex <= 21 ) {
+        Dfuga.setAttribute("max", convertirMax(tube.value, "mm", Duni.value));
+      }
+      else if (tube.selectedIndex > 21 && tube.selectedIndex <= 38 ) {
+        Dfuga.setAttribute("max", convertirMax(tube.value, "in", Duni.value));
+      }
+      else {
+        Dfuga.setAttribute("max", convertirMax(tube.value, "mm", Duni.value));
+      }
+    }
+
+    function obtenerUbicacion() {
+      if ("geolocation" in navigator) {
+          navigator.geolocation.getCurrentPosition(function(position) {
+              var latitud = position.coords.latitude;
+              var longitud = position.coords.longitude;
+
+              document.getElementById("ubicacion").value = latitud + "," + longitud;
+          });
+      } else {
+          alert("Geolocalización no está disponible en este navegador.");
+      }
+    }
+
+    function convertirMax(valor, unidad1, unidad2){
+      var conv = 0;
+      if (unidad1 == "mm"){
+        if (unidad2 == "in"){
+          conv = Math.round(valor / 25.4 * 100) / 100;
+        }
+        else{
+          conv = valor;
+        }
+      }
+      else{
+        if (unidad2 == "mm"){
+          conv = Math.round(valor * 25.4 * 100) / 100;
+        }
+        else{
+          conv = valor;
+        }
+      }
+      return conv;
+    }
+    function mostrarLabel(){
+      if (getCookie("nuevo") == "-1"){
+        document.getElementById("noOrden").style.display = "inline-block";
+      }
+    }
+
+    mostrarLabel()
+    fechas_max()
+    habilitar_fin()
+    habilitar_diametro()
+    // var inputElement = document.getElementById('Altofuga');
+
+    // // Agrega un evento de mouseover al campo de entrada
+    // inputElement.addEventListener('mouseover', function() {
+    //   // Muestra el mensaje en el título (tooltip)
+    //   inputElement.title = "Si desconoce este valor, dejar el campo en blanco";
+    // });
+
+    // inputElement.addEventListener('focus', function() {
+    //   // Muestra el mensaje en el título (tooltip)
+    //   inputElement.title = "Si desconoce este valor, dejar el campo en blanco";
+    // });
+    // inputElement.addEventListener('blur', function() {
+    //   // Restaura el título a su valor original cuando el campo pierde el foco
+    //   inputElement.title = "Si desconoce este valor, dejar el campo en blanco";
+    // });
+  </script>
+  </script>
+</html>

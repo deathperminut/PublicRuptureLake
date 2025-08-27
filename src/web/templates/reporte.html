@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Reporte</title>
+    <meta property="og:title" content="Reporte" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8" />
+    <meta property="twitter:card" content="summary_large_image" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reporte.css') }}" />
+
+
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&amp;display=swap"
+      data-tag="font"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&amp;display=swap"
+      data-tag="font"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&amp;display=swap"
+      data-tag="font"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&amp;display=swap"
+      data-tag="font"
+    />
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <script src="https://kit.fontawesome.com/697919b5b5.js" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  </head>
+  <body style="background-image: url('{{ url_for('static', filename='images/Fondo.png') }}')";>
+    <div class="resultados-header">
+      <div class="resultados-app-container">
+        <form method="GET" action="Inicio">
+          <button type="submit" class="resultados-button button">
+            <i class="fa fa-right-from-bracket"></i>
+          </button>
+        </form>
+        <img
+          alt="Logo FuGas"
+          src="{{ url_for('static', filename='images/logos/RL_logo.png') }}"
+          class="resultados-app-logo"
+          onclick="window.location.href ='Perfil';"
+        />
+      </div>
+    </div>
+    <div class="resultados-container2">
+      <div class="resultados-datos">  
+        <div class="resultados-numerodeorden"> 
+          <span class="resultados-N-orden">Número de orden:</span>
+          <label id="orden" name="orden" class="resultados-N-orden1">Orden</label>
+        </div>
+        <div class="grid2">
+          <label class="resultados-titulo">Información general</label>
+          <label class="resultados-titulo">Características del evento</label>
+          <div class="Subgrid1">
+            <span class="resultados-textf">Fecha de reporte:</span>
+            <label id="fecha_reporte" name="fecha_reporte" class="resultados-letra">31/12/2000</label>
+            <span class="resultados-textf">Fecha de inicio:</span>
+            <label id="fecha_inicio" name="fecha_inicio" class="resultados-letra">31/12/2000</label>
+            <span class="resultados-textf">Duración de la fuga:</span>
+            <label id="duracion" name="duracion" class="resultados-letra"></label>
+            <span class="resultados-textf">Ubicación (Lat, Long):</span>
+            <label id="ubicacion" name="ubicacion" class="resultados-letra">xx.xxx, yy.yyy</label>
+            <span class="resultados-textf">Presión atmosférica:</span>
+            <label id="presion_atmos" name="presion_atmos" class="resultados-letra">psi</label>
+            <span class="resultados-textf">Presión de la tubería:</span>
+            <label id="presion_tube" name="presion_tube" class="resultados-letra"">psi</label>
+          </div>
+          <div class="Subgrid2">
+            <span class="resultados-textf">Dirección de flujo:</span>
+            <label id="dire" name="dire" class="resultados-letra"></label>
+            <span class="resultados-textf">Diámetro de la tubería:</span>
+            <label id="Diametro_tube" name="Diametro_tube" class="resultados-letra"></label>
+            <span class="resultados-textf">Distancia de la válvula:</span>
+            <label id="Tlargo" name="Tlargo" class="resultados-letra"></label>
+            <span class="resultados-textf">Naturaleza de la rotura:</span>
+            <label id="subte" name="subte" class="resultados-letra"></label>
+            <span class="resultados-textf">Forma de la rotura:</span>
+            <label id="forma" name="forma" class="resultados-letra"></label>
+            <span class="resultados-textf">Área de la rotura:</span>
+            <label id="area" name="area" class="resultados-letra"></label>
+          </div>
+        </div>
+        <div class="grid3">
+          <label for="orden">Detalles de la rotura</label>
+        </div>
+        <div class="grid4">
+          <div class="Subgrid3">
+            <span class="resultados-textf">Caudal de rotura:</span>
+            <label id="flujo" name="flujo" class="resultados-letra"></label>
+            <span class="resultados-textf">Volumen total:</span>
+            <label id="volumen" name="volumen" class="resultados-letra"></label>
+                      </div>
+
+          <div class="Subgrid4">
+            <span class="resultados-textf">Volumen en la tubería:</span>
+            <label id="vol_muerto" name="vol_muertp" class="resultados-letra"></label>
+            <span class="resultados-textf">Volumen de la rotura:</span>
+            <label id="volumenfugado" name="volumenfugado" class="resultados-letra"> </label>
+</div>  
+          </div>  
+        </div>
+      </div>
+
+      <div class="resultados-container7">
+        <label id="aprobado" name="aprobado" class="reporte-label"></label>
+      </div>
+      <div class="resultados-container7">             
+        <form method="POST" action="CargarBuscar" class="reporte-forma">
+          <button type="submit" class="resultados-evento-btn button">
+            Volver
+          </button>
+        </form>
+        <form method="POST" id="aprobarForm" action="Aprobar" class="reporte-forma">
+          <button id="aprobarBoton" name="aprobarBoton" type="submit" class="resultados-evento-btn button">
+            Aprobar
+          </button>
+        </form>
+        <form method="POST" id="editarForm" action="Editar" class="reporte-forma">
+          <button id="editarBoton" name="editarBoton" type="submit" class="resultados-evento-btn button">
+            Editar
+          </button>
+        </form>
+      </div>
+
+    <div class="Resultados-footer">
+      <div class="Resultados-genergetica-container">
+        <img
+          src="static/images/logos/Logo_Gasostenible.png"
+          class="Resultados-gasostenible-logo"
+        />
+        <img
+          src="static/images/logos/Logo_Genergetica.png"
+          class="Resultados-genergetica-logo"
+        />
+        <img
+          src="static/images/logos/Logo_UTP.png"
+          class="Resultados-UTP-logo"
+        />
+        <img
+          src="static/images/logos/logo-taturgas.png"
+          class="Resultados-main-logo"
+          />
+        </div>
+      <div class="Resultados-slogan-container">
+        <h1 class="resultados-slogan">Gas natural<br>#UnaElecciónNatural</h1>
+      </div>
+    </div>
+  </body>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+    function getCookie(cname) {
+      let name = cname + "=";
+      let decodedCookie = decodeURIComponent(document.cookie);
+      let ca = decodedCookie.split(';');
+      for(let i = 0; i <ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) == ' ') {
+          c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+          return c.substring(name.length, c.length);
+        }
+      }
+      return "";
+    }
+
+    function ocultarBoton(){
+      if (getCookie("tipo_user") != "1" || "{{ aprobado }}" == "sí"){
+        document.getElementById("aprobarForm").style.display = "none";
+        document.getElementById("aprobarBoton").disabled = true;
+      }
+    }
+
+    document.getElementById("orden").innerHTML = "{{ orden }}"
+    document.getElementById("fecha_reporte").innerHTML = "{{ dia_reg }}/{{ mes_reg }}/{{ año_reg }}"
+    document.getElementById("fecha_inicio").innerHTML = "{{ dia_inicio }}/{{ mes_inicio }}/{{ año_inicio }}"
+    document.getElementById("ubicacion").innerHTML = "{{ latitud }}, {{ longitud }}"
+    document.getElementById("volumen").innerHTML = "{{ volumen }} m<sup>3"
+    document.getElementById("volumenfugado").innerHTML = "{{ Volumenfugado }} m<sup>3"
+    document.getElementById("presion_atmos").innerHTML = "{{ presion_atmos }} psi"
+    document.getElementById("flujo").innerHTML = "{{ flujo }} m<sup>3</sup>/h"
+    document.getElementById("duracion").innerHTML = "{{ horas }} horas y {{minutos}} minutos"
+    document.getElementById("area").innerHTML = "{{ area }} mm<sup>2</sup>"
+    document.getElementById("dire").innerHTML = "{{ direccion }}"
+    document.getElementById("forma").innerHTML = "{{ forma }}"
+    document.getElementById("presion_tube").innerHTML = "{{ presion_tube }} psig"
+    document.getElementById("Tlargo").innerHTML = "{{ Tlargo }} {{ TlargoUni }}"
+    document.getElementById("subte").innerHTML = "{{ Subte }}"
+    document.getElementById("vol_muerto").innerHTML = "{{ vol_muerto }} m<sup>3"
+    document.getElementById("Diametro_tube").innerHTML = "{{diame_tube}} {{ Unidades }} de {{ material }}"
+    document.getElementById("aprobado").innerHTML = "Aprobado: {{ aprobado }}"
+
+    ocultarBoton();
+  </script>
+</html>

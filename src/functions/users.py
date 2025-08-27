@@ -24,6 +24,10 @@ def createUser(body):
     if(len(response) != 0):
         return {'status':'Usuario con cédula ya éxistente'}
     else:
+        # Hashear la contraseña antes de guardar
+        if 'password' in body:
+            body['password'] = hash_password(body['password'])
+        
         response = db.users.insert_one(
             body
         )
@@ -84,11 +88,14 @@ def hash_password(password):
     # Genera un salt y hashea la contraseña
     salt = bcrypt.gensalt()
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
-    return hashed_password
+    return hashed_password.decode('utf-8')  # Devolver como string para MongoDB
 
 
 def verificar_password(stored_password, provided_password):
     # Compara la contraseña proporcionada con la almacenada
+    # Si stored_password es string, convertir a bytes
+    if isinstance(stored_password, str):
+        stored_password = stored_password.encode('utf-8')
     return bcrypt.checkpw(provided_password.encode('utf-8'), stored_password)
 
 

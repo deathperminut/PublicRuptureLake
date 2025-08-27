@@ -1,0 +1,262 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+.inicio-container {
+  display: flex;
+  overflow: auto;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  margin-top: 0%;
+}
+
+body {
+  background-image: url('/static/images/Fondo.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.inicio-header {
+  flex: 0 0 auto;
+  width: 100%;
+  height: 14.144271570014144vh;
+  display: flex;
+  align-items: flex-start;
+  background-color: #E0F2F5;
+  justify-content: flex-end;
+  align-items: center;
+  flex-direction: row;
+}
+
+.inicio-container {
+  display: flex;
+  overflow: hidden;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  margin-top: 0;
+  height: 66.05374823196605vh;
+}
+
+.inicio-footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 14.144271570014144vh;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  background-color: #E0F2F5;
+}
+
+.inicio-app-logo {
+  max-width: 40%;
+  width: 28.28854314002829vh;
+  max-height: 70%;
+  height: auto;
+  margin: 1.1vh;
+  cursor: pointer;
+}
+
+.inicio-container1 {
+  flex: 0 0 auto;
+  width: 30%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 1vh;
+}
+
+.inicio-texto01 {
+
+  font-family:Verdana, Geneva, Tahoma, sans-serif;
+  font-size: larger;
+  align-items: center;
+  flex: 1;
+  color: rgb(227, 227, 227);
+}
+
+.inicio-lblContraseña {
+  font-family:  Helvetica, sans-serif, Arial;
+  font-size: large;
+  display: flex;
+  align-self: center;
+  color: #ffffff;
+  text-decoration: underline;
+  cursor: pointer;
+  margin-top: 40px;
+}
+
+
+
+.inicio-text-B1 {
+
+  height: 100%;
+  width: 60%;
+  flex: 1;
+  border: 0.1vh solid #6dab3c;
+  border-radius: 5px;
+}
+
+.inicio-genergetica-container {
+  flex: 2 2 auto;
+  width: 67%;
+  height: 100%;
+  margin-left: 3%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.inicio-gasostenible-logo {
+  max-width: 25%;
+  max-height: 70%;
+  margin-left: 5vh;
+  object-fit: cover;
+}
+
+.inicio-UTP-logo {
+  max-width: 20%;
+  object-fit: cover;
+  max-height: 55%;
+}
+
+.inicio-main-logo {
+  max-width: 60%;
+  max-height: 70%;
+  object-fit: cover;
+}
+
+.inicio-genergetica-logo {
+  max-width: 25%;
+  max-height: 70%;
+  object-fit: cover;
+}
+
+.inicio-cuerpo-container {
+  flex: 0 0 auto;
+  width: 100%;
+  height: 78.223vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.inicio-container6 {
+  flex: 0 0 auto;
+  width: 100%;
+  display: flex;
+  margin-top: 3vh;
+  align-items: center;
+  flex-direction: row;
+  justify-content: center;
+}
+.inicio-ingresar-btn {
+  color: var(--dl-color-gray-white);
+  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  border-radius: 20px;
+  border: none;
+  background-color: #6dab3c;
+  box-shadow: 10px 10px 10px rgba(0.1, 0.5, 0.1, 0.1);
+  transition: 1s;
+  margin-left: 30px;
+  margin-bottom: 30px;
+  
+}
+.inicio-ingresar-btn:hover{
+  transform: scale(1.1);
+  background-color: #90cc62 !important;
+}
+
+.inicio-form {
+  display: contents;
+}
+
+.inicio-label {
+  padding: 1vh;
+  width: auto;
+  margin-top: 1vh;
+  border-radius:1vh;
+  border: 1px solid black;
+  background-color: rgb(188, 5, 5);
+  color: white;
+  align-self: center;
+}
+
+.inicio-slogan-container {
+  flex: 0 0 auto;
+  width: 25%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.inicio-slogan{
+  font-family: Montserrat;
+  font-size: 1.2vw;
+  font-weight: 500;
+  color: black;
+  max-height: 70%;
+  max-width: 80%;
+  text-align: center;
+}
+
+@media (max-width: 1400px) {
+  .inicio-container1{
+    width: 40%;
+  }
+}
+
+@media (max-width: 1000px) {
+  .inicio-container1{
+    width: 50%;
+  }
+  .inicio-text-B1{
+    font-size: smaller;
+  }
+}
+
+@media (max-width: 800px) {
+  .inicio-container1{
+    width: 60%;
+  }
+  .inicio-texto01{
+    font-size: medium;
+  }
+  .inicio-ingresar-btn{
+    font-size: medium;
+  }
+}
+
+@media (max-width: 720px) {
+  .inicio-slogan-container {
+    display: none;
+  }
+  .inicio-genergetica-container {
+    width: 97%;
+  }
+  .inicio-UTP-logo {
+    max-height: 40%;
+  }
+}
+
+@media (max-width: 600px) {
+  .inicio-container1{
+    width: 80%;
+  }
+  .inicio-text-B1{
+    font-size: x-small;
+  }
+}
+
+@media (max-width: 400px) {
+  .inicio-container6{
+    flex-direction: column;
+  }
+}

@@ -1,0 +1,276 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  background-image: url('/static/images/Fondo.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+  margin-bottom: 14.144271570014144vh;
+}
+
+.buscar-header {
+  flex: 0 0 auto;
+  width: 100%;
+  height: 14.144271570014144vh;
+  display: flex;
+  align-items: flex-start;
+  background-color: #E0F2F5;
+  justify-content: flex-end;
+  align-items: center;
+  flex-direction: row;
+}
+
+.buscar-utp-container{
+  flex: 2 2 auto;
+  width: 67%;
+  height: 100%;
+  margin-left: 3%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.buscar-container {
+  display: flex;
+  overflow: auto;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  margin-top: 0%;
+}
+
+.buscar-empresas-container {
+  flex: 0 0 auto;
+  width: 33%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.buscar-main-logo {
+  max-width: 25%;
+  max-height: 70%;
+  object-fit: cover;
+  cursor: pointer;
+}
+
+.buscar-UTP-logo{
+  max-width: 25%;
+  object-fit: cover;
+  max-height: 70%;
+}
+
+.buscar-gasostenible-logo {
+  max-width: 25%;
+  max-height: 70%;
+  object-fit: cover;
+}
+
+.buscar-genergetica-logo{
+  max-width: 25%;
+  max-height: 70%;
+  object-fit: cover;
+}
+.buscar-empresa-logo {
+  width: 18%;
+  margin: 10px;
+  object-fit: cover;
+}
+.buscar-titulo-container {
+  flex: 0 0 auto;
+  width: 33%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.buscar-app-container {
+  flex: 0 0 auto;
+  width: 34%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+.buscar-button {
+  border-width: 0px;
+  cursor: pointer;
+}
+.buscar-app-logo {
+  max-width: 80%;
+  max-height: 70%;
+  margin: 1.1vh;
+  cursor: pointer;
+}
+
+.buscar-container2 {
+  flex: 0 0 auto;
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+}
+.buscar-container3 {
+  flex: 0 0 auto;
+  min-width: 40%;
+  max-width: 80%;
+  height: 20vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.buscar-text {
+  font-family:Verdana, Geneva, Tahoma, sans-serif;
+  color: rgb(214, 214, 214);
+}
+.buscar-txt-orden {
+  font-size: medium;
+  font-family: Montserrat;
+}
+.buscar-label {
+  padding: 1vh;
+  margin-top: 2vh;
+  border-radius:1vh;
+  border: 1px solid black;
+  background-color: rgb(188, 5, 5);
+  color: white;
+}
+.buscar-container4 {
+  flex: 0 0 auto;
+  min-width: 40%;
+  max-width: 80%;
+  min-height: 14vh;
+  display: flex;
+  margin-top: 1%;
+  align-items: center;
+  flex-direction: column;
+}
+.buscar-report-btn {
+  color: var(--dl-color-gray-white);
+  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background-color: #6dab3c;
+  box-shadow: 10px 10px 10px rgba(0.1, 0.5, 0.1, 0.1);
+  transition: 1s;
+}
+.buscar-orden-btn {
+  color: var(--dl-color-gray-white);
+  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  border-radius: 20px;
+  width: 50px;
+  height: 50px;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  background-color: #6dab3c;
+  box-shadow: 10px 10px 10px rgba(0.1, 0.5, 0.1, 0.1);
+  transition: 1s;
+  margin-left: 10px;
+}
+.buscar-footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 14.144271570014144vh;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  background-color: #E0F2F5;
+}
+
+.buscar-slogan-container {
+  flex: 0 0 auto;
+  width: 25%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+}
+.buscar-slogan {
+  font-family: Montserrat;
+  font-size: 1.2vw;
+  font-weight: 500;
+  color: black;
+  max-height: 70%;
+  max-width: 80%;
+}
+.buscar-container5 {
+  flex: 0 0 auto;
+  width: 33%;
+  height: 100%;
+  display: flex;
+  align-items: end;
+  flex-direction: column;
+  justify-content: center;
+}
+.buscar-text1 {
+  margin: 3%;
+  font-size: larger;
+  text-align: center;
+}
+.buscar-text4 {
+  font-size: larger;
+  text-align: center;
+}
+
+.Filtro-forma{
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+}
+
+.Filtro-container{
+  flex: 0 0 auto;
+  display: grid;
+  height: auto;
+  max-width: 90%;
+  margin-bottom: 1vh;
+  grid-template-columns: 2fr 1fr;
+  font-family: Helvetica, sans-serif, Arial;
+  justify-content: flex-start;
+}
+
+.Filtro-label1{
+  font-family: Helvetica, sans-serif, Arial;
+  font-size: large;
+  align-content: center;
+  color: white;
+
+}
+
+.filtro-check {
+  width: 3vh;
+}
+
+.evento-txt-orden {
+  font-size:medium;
+  font-family: Helvetica, sans-serif, Arial;
+  color: var(--dl-color-gray-black);
+  cursor: auto;
+  border-color: var(--dl-color-gray-black);
+  border-width: 1px;
+  border-radius: 4px;
+  background-color: var(--dl-color-gray-white);
+  text-align: center;
+}
+
+@media (max-width: 720px) {
+  .buscar-slogan-container {
+    display: none;
+  }
+  .buscar-utp-container {
+    width: 97%;
+  }
+  .buscar-UTP-logo {
+    max-height: 40%;
+  }
+}

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Buscar</title>
+    <meta property="og:title" content="Buscar" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8" />
+    <meta property="twitter:card" content="summary_large_image" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/buscar.css') }}" />
+
+    <style data-tag="reset-style-sheet">
+      html {  line-height: 1.15;}body {  margin: 0;}* {  box-sizing: border-box;  border-width: 0;  border-style: solid;}p,li,ul,pre,div,h1,h2,h3,h4,h5,h6,figure,blockquote,figcaption {  margin: 0;  padding: 0;}button {  background-color: transparent;}button,input,optgroup,select,textarea {  font-family: inherit;  font-size: 100%;  line-height: 1.15;  margin: 0;}button,select {  text-transform: none;}button,[type="button"],[type="reset"],[type="submit"] {  -webkit-appearance: button;}button::-moz-focus-inner,[type="button"]::-moz-focus-inner,[type="reset"]::-moz-focus-inner,[type="submit"]::-moz-focus-inner {  border-style: none;  padding: 0;}button:-moz-focus,[type="button"]:-moz-focus,[type="reset"]:-moz-focus,[type="submit"]:-moz-focus {  outline: 1px dotted ButtonText;}a {  color: inherit;  text-decoration: inherit;}input {  padding: 2px 4px;}img {  display: block;}html { scroll-behavior: smooth  }
+    </style>
+    <style data-tag="default-style-sheet">
+      html {
+        font-family: Inter;
+        font-size: 16px;
+      }
+
+      body {
+        font-weight: 400;
+        font-style:normal;
+        text-decoration: none;
+        text-transform: none;
+        letter-spacing: normal;
+        line-height: 1.15;
+        color: var(--dl-color-gray-black);
+        background-color: var(--dl-color-gray-white);
+
+      }
+    </style>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&amp;display=swap"
+      data-tag="font"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&amp;display=swap"
+      data-tag="font"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&amp;display=swap"
+      data-tag="font"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&amp;display=swap"
+      data-tag="font"
+    />
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <script src="https://kit.fontawesome.com/697919b5b5.js" crossorigin="anonymous"></script>
+    <!-- Bootstrap-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  </head>
+  <body style="background-image: url('{{ url_for('static', filename='images/Fondo.png') }}')";>
+    <div class="buscar-header">
+        <div class="buscar-app-container">
+          <form method="GET" action="Inicio">
+            <button type="submit" class="buscar-button button">
+              <i class="fa fa-right-from-bracket"></i>
+            </button>
+          </form>
+          <img
+            alt="Logo FuGas"
+            src="{{ url_for('static', filename='images/logos/RL_logo.png') }}"
+            class="buscar-app-logo"
+            onclick="window.location.href ='Perfil';"
+          />
+        </div>
+    </div>
+
+    <div class="buscar-container">
+        <div class="buscar-container3">
+          <h1 id="banner" name="banner" class="buscar-text">Número de orden:</h1>
+        </div>
+        <div class="buscar-container4">
+          <form method="POST" action="Buscar">
+            <input type="text" id="orden" name="orden" required="" class="buscar-txt-orden input" />
+            <button type="submit" class="buscar-orden-btn button">
+              <i class="fa fa-magnifying-glass"></i>
+            </button>
+          </form>
+          <label id="noResults" class="buscar-label">Sin resultados</label>
+        </div>
+        <div class="buscar-container4">
+          <form method="POST" class="Filtro-forma" action="Descargar">
+            <!-- <div>
+              <label class="Filtro-label1">Filtrar por fecha:</label>
+              <input type="checkbox" id="actFiltros" name="actFiltros" class="filtro-check" onclick="mostrarFiltros()"></input>
+            </div>
+            <div id="filtros" class="Filtro-container">
+              <label for="fecha_ini" class="Filtro-label1">Fecha inicial:</label>
+              <input type="date" class="evento-txt-orden" id="fecha_ini" name="fecha_ini" onfocus="this.showPicker()" oninput="fechaMinima()"></input>
+              <label for="fecha_final" class="Filtro-label1">Fecha final:</label>
+              <input type="date" class="evento-txt-orden" id="fecha_final" name="fecha_final" onfocus="this.showPicker()" oninput="fechaMaxima()"></input>
+            </div> -->
+            <button id="descargarBoton" type="submit" class="buscar-report-btn button">
+              Descargar eventos
+            </button>
+          </form>
+        </div>
+    </div>
+
+    <div class="buscar-footer">
+      <div class="buscar-utp-container">
+        <img
+          src="static/images/logos/Logo_Gasostenible.png"
+          class="buscar-gasostenible-logo"
+        />
+        <img
+          src="{{ url_for('static', filename='images/logos/Logo_UTP.png') }}"
+          class="buscar-UTP-logo"
+        />
+        <img
+          src="{{ url_for('static', filename='images/logos/Logo_Genergetica.png') }}"
+          class="buscar-genergetica-logo"
+        />
+        <img
+        src="{{ url_for('static', filename='images/logos/logo-taturgas.png') }}"
+        class="buscar-main-logo"
+        />
+      </div>
+      <div class="buscar-slogan-container">
+        <h1 class="buscar-slogan"><center>Gas natural<br>#UnaElecciónNatural</center></h1>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+  </body>
+  <script>
+    function getCookie(cname) {
+      let name = cname + "=";
+      let decodedCookie = decodeURIComponent(document.cookie);
+      let ca = decodedCookie.split(';');
+      for(let i = 0; i <ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) == ' ') {
+          c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+          return c.substring(name.length, c.length);
+        }
+      }
+      return "";
+    }
+
+
+    function ocultarLabel(){
+      if (getCookie("orden") != "-1"){
+        document.getElementById("noResults").style.display = "none";
+      }
+      else if (getCookie("orden") == "-2"){
+        document.getElementById("noResults").innerHTML = "Archivo no encontrado";
+      }
+    }
+
+    function mostrarFiltros(){
+      if (document.getElementById("actFiltros").checked){
+        document.getElementById("filtros").style.display = "grid";
+      }
+      else {
+        document.getElementById("filtros").style.display = "none";
+      }
+    }
+
+    function fechas_hoy(){
+      var today = new Date();
+      var dd = today.getDate();
+      var mm = today.getMonth() + 1; //January is 0!
+      var yyyy = today.getFullYear();
+      var hoy;
+
+      if (dd < 10) {
+        dd = '0' + dd;
+      }
+
+      if (mm < 10) {
+        mm = '0' + mm;
+      }
+
+      hoy = yyyy + '-' + mm + '-' + dd;
+      document.getElementById("fecha_final").max = hoy;
+      document.getElementById("fecha_ini").max = hoy;
+    }
+
+    function fechaMaxima(){
+      document.getElementById("fecha_ini").max = document.getElementById("fecha_final").value;
+    }
+
+    function fechaMinima(){
+      document.getElementById("fecha_final").min = document.getElementById("fecha_ini").value;
+    }
+
+
+    ocultarLabel();
+    fechas_hoy();
+    mostrarFiltros();
+  </script>
+</html>

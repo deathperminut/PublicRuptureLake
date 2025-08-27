@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Resultados</title>
+    <meta property="og:title" content="Resultados" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8" />
+    <meta property="twitter:card" content="summary_large_image" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/resultados.css') }}" />
+
+    <style data-tag="reset-style-sheet">
+      html {  line-height: 1.15;}body {  margin: 0;}* {  box-sizing: border-box;  border-width: 0;  border-style: solid;}p,li,ul,pre,div,h1,h2,h3,h4,h5,h6,figure,blockquote,figcaption {  margin: 0;  padding: 0;}button {  background-color: transparent;}button,input,optgroup,select,textarea {  font-family: inherit;  font-size: 100%;  line-height: 1.15;  margin: 0;}button,select {  text-transform: none;}button,[type="button"],[type="reset"],[type="submit"] {  -webkit-appearance: button;}button::-moz-focus-inner,[type="button"]::-moz-focus-inner,[type="reset"]::-moz-focus-inner,[type="submit"]::-moz-focus-inner {  border-style: none;  padding: 0;}button:-moz-focus,[type="button"]:-moz-focus,[type="reset"]:-moz-focus,[type="submit"]:-moz-focus {  outline: 1px dotted ButtonText;}a {  color: inherit;  text-decoration: inherit;}input {  padding: 2px 4px;}img {  display: block;}html { scroll-behavior: smooth  }
+    </style>
+    <style data-tag="default-style-sheet">
+      html {
+        font-family: Inter;
+        font-size: 16px;
+      }
+
+    </style>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&amp;display=swap"
+      data-tag="font"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&amp;display=swap"
+      data-tag="font"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&amp;display=swap"
+      data-tag="font"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&amp;display=swap"
+      data-tag="font"
+    />
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <script src="https://kit.fontawesome.com/697919b5b5.js" crossorigin="anonymous"></script>
+  </head>
+  <body style="background-image: url('{{ url_for('static', filename='images/Fondo.png') }}')";>
+    <link rel="stylesheet" href="./style.css" />
+    <link href="./resultados.css" rel="stylesheet" />
+    <div class="resultados-header">
+      <div class="resultados-app-container">
+        <form method="GET" action="Inicio">
+          <button type="submit" class="resultados-button button">
+            <i class="fa fa-right-from-bracket"></i>
+          </button>
+        </form>
+        <img
+          alt="Logo FuGas"
+          src="{{ url_for('static', filename='images/logos/RL_logo.png') }}"
+          class="resultados-app-logo"
+          onclick="window.location.href ='Perfil';"
+        />
+      </div>
+    </div>
+    <div class="resultados-container2">
+      <div class="resultados-datos">  
+        <div class="resultados-numerodeorden"> 
+          <span class="resultados-N-orden">Número de orden:     </span>
+          <label id="orden" name="orden" class="resultados-N-orden1">Orden</label>
+        </div>
+        <div class="grid2">
+          <label class="resultados-titulo">Información general</label>
+          <label class="resultados-titulo">Características del evento</label>
+          <div class="Subgrid1">
+            <span class="resultados-textf">Fecha de reporte:</span>
+            <label id="fecha_reporte" name="fecha_reporte" class="resultados-letra">31/12/2000</label>
+            <span class="resultados-textf">Fecha de inicio:</span>
+            <label id="fecha_inicio" name="fecha_inicio" class="resultados-letra">31/12/2000</label>
+            <span class="resultados-textf">Duración de la fuga:</span>
+            <label id="duracion" name="duracion" class="resultados-letra"></label>
+            <span class="resultados-textf">Ubicación (Lat, Long):</span>
+            <label id="ubicacion" name="ubicacion" class="resultados-letra">xx.xxx, yy.yyy</label>
+            <span class="resultados-textf">Presión atmosférica:</span>
+            <label id="presion_atmos" name="presion_atmos" class="resultados-letra">psi</label>
+            <span class="resultados-textf">Presión de la tubería:</span>
+            <label id="presion_tube" name="presion_tube" class="resultados-letra"">psi</label>
+          </div>
+          <div class="Subgrid2">
+            <span class="resultados-textf">Dirección de flujo:</span>
+            <label id="dire" name="dire" class="resultados-letra"></label>
+<span class="resultados-textf">Diámetro de la tubería:</span>
+            <label id="Diametro_tube" name="Diametro_tube" class="resultados-letra"></label>
+            <span class="resultados-textf">Distancia de la válvula:</span>
+            <label id="Tlargo" name="Tlargo" class="resultados-letra"></label>
+            <span class="resultados-textf">Naturaleza de la rotura:</span>
+            <label id="subte" name="subte" class="resultados-letra"></label>
+            <span class="resultados-textf">Forma de la rotura:</span>
+            <label id="forma" name="forma" class="resultados-letra"></label>
+            <span class="resultados-textf">Área de la rotura:</span>
+            <label id="area" name="area" class="resultados-letra"></label>
+          </div>
+        </div>
+        <div class="grid3">
+          <label for="orden">Volumen perdido</label>
+        </div>
+        <div class="grid4">
+          <div class="Subgrid3">
+<span class="resultados-textf">Caudal de rotura:</span>
+            <label id="flujo" name="flujo" class="resultados-letra"></label>
+            <span class="resultados-textf">Volumen total:</span>
+            <label id="volumen" name="volumen" class="resultados-letra"></label>
+                      </div>
+
+          <div class="Subgrid4">
+            <span class="resultados-textf">Volumen en la tubería:</span>
+            <label id="vol_muerto" name="vol_muertp" class="resultados-letra"></label>
+            <span class="resultados-textf">Volumen en la rotura:</span>
+            <label id="volumenfugado" name="volumenfugado" class="resultados-letra"> </label>
+          </div>  
+        </div>
+        <div class="resultados-container7"> 
+          <div class="resultados-evento">           
+            <form method="POST" action="NuevoEvento">
+              <button type="submit" class="resultados-evento-btn button">
+                Nuevo Evento
+              </button>
+          </div>
+          </form>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="Resultados-footer">
+      <div class="Resultados-genergetica-container">
+        <img
+          src="static/images/logos/Logo_Gasostenible.png"
+          class="Resultados-gasostenible-logo"
+        />
+        <img
+          src="static/images/logos/Logo_Genergetica.png"
+          class="Resultados-genergetica-logo"
+        />
+        <img
+          src="static/images/logos/Logo_UTP.png"
+          class="Resultados-UTP-logo"
+        />
+<img
+        src="static/images/logos/logo-taturgas.png"
+        class="Resultados-main-logo"
+        />
+      </div>
+      <div class="Resultados-slogan-container">
+        <h1 class="Resultados-slogan" style="font-family: Helvetica, sans-serif, Arial; font-size:0.9375VW; color: black;">Gas natural</h1>
+        <h1 class="Resultados-slogan" style="font-family: Helvetica, sans-serif, Arial; font-size:0.9375VW; color: black;">#UnaElecciónNatural</h1>
+      </div>
+    </div>
+  </body>
+
+  
+  <script type="text/javascript">
+    function getCookie(cname) {
+      let name = cname + "=";
+      let decodedCookie = decodeURIComponent(document.cookie);
+      let ca = decodedCookie.split(';');
+      for(let i = 0; i <ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) == ' ') {
+          c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+          return c.substring(name.length, c.length);
+        }
+      }
+      return "";
+    }
+
+    document.getElementById("orden").innerHTML = "{{ orden }}"
+    document.getElementById("fecha_reporte").innerHTML = "{{ dia_reg }}/{{ mes_reg }}/{{ año_reg }}"
+    document.getElementById("fecha_inicio").innerHTML = "{{ dia_inicio }}/{{ mes_inicio }}/{{ año_inicio }}"
+    document.getElementById("ubicacion").innerHTML = "{{ latitud }}, {{ longitud }}"
+    document.getElementById("volumen").innerHTML = "{{ volumen }} m<sup>3"
+    document.getElementById("volumenfugado").innerHTML = "{{ Volumenfugado }} m<sup>3"
+    document.getElementById("presion_atmos").innerHTML = "{{ presion_atmos }} psia"
+    document.getElementById("flujo").innerHTML = "{{ flujo }} m<sup>3</sup>/h"
+    document.getElementById("duracion").innerHTML = "{{ horas }} horas y {{minutos}} minutos"
+    document.getElementById("area").innerHTML = "{{ area }} mm<sup>2</sup>"
+    document.getElementById("dire").innerHTML = "{{ direccion }}"
+    document.getElementById("forma").innerHTML = "{{ forma }}"
+    document.getElementById("presion_tube").innerHTML = "{{ presion_tube }} psig"
+    document.getElementById("Tlargo").innerHTML = "{{ Tlargo }} {{ TlargoUni }}"
+    document.getElementById("subte").innerHTML = "{{ Subte }}"
+    document.getElementById("vol_muerto").innerHTML = "{{ vol_muerto }} m<sup>3"
+document.getElementById("Diametro_tube").innerHTML = "{{ Tdiametro }} {{ Unidades }} de {{ material }}"
+  </script>
+</html>

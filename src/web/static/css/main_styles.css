@@ -1,0 +1,21 @@
+.ErrorAlert{
+    width: 100%;
+    height: 40px;
+    background-color: red;
+    list-style-type: none; /* Elimina las viñetas de los elementos de la lista */
+    color: white;
+    text-align: center;
+    margin:0;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.SuccessAlert{
+    width: 100%;
+    height: 40px;
+    background-color: rgb(4, 255, 0);
+    list-style-type: none; /* Elimina las viñetas de los elementos de la lista */
+    color: white;
+    text-align: center;
+    margin:0;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}

@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 
 # Instalar dependencias de Python (algunas pueden fallar y no son críticas para MongoDB)
-RUN pip install --no-cache-dir flask flask_cors flask_session pymongo bcrypt python-dotenv pandas || true
+RUN pip install --no-cache-dir flask flask_cors flask_session pymongo bcrypt python-dotenv pandas openpyxl numpy || true
 RUN pip install --no-cache-dir psycopg2 || echo "psycopg2 failed - skipping"
 RUN pip install --no-cache-dir pyodbc || echo "pyodbc failed - skipping"  
 RUN pip install --no-cache-dir msal || echo "msal failed - skipping"
