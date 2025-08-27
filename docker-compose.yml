@@ -1,0 +1,53 @@
+version: '3.9'
+
+services:
+  # Base de datos MongoDB
+  mongodb_efigas:
+    image: mongo:5.0
+    container_name: rupture_mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+    volumes:
+      - ${MONGO_DATA_PATH}:/data/db
+    networks:
+      - rupture_network
+
+  # Aplicación Flask
+  flask_app:
+    build: .
+    container_name: rupture_flask_app
+    restart: unless-stopped
+    ports:
+      - "${FLASK_PORT}:${FLASK_PORT}"
+    environment:
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_PORT=${MONGO_PORT}
+      - MONGO_USERNAME=${MONGO_USERNAME}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_DATABASE=${MONGO_DATABASE}
+      - FLASK_HOST=${FLASK_HOST}
+      - FLASK_PORT=${FLASK_PORT}
+      - FLASK_DEBUG=${FLASK_DEBUG}
+    depends_on:
+      - mongodb_efigas
+    networks:
+      - rupture_network
+    # Esperar a que MongoDB esté disponible
+    command: >
+      sh -c "
+        echo 'Esperando a MongoDB...' &&
+        while ! nc -z ${MONGO_HOST} ${MONGO_PORT}; do
+          sleep 1
+        done &&
+        echo 'MongoDB está disponible' &&
+        python initialization.py &&
+        python src/main.py
+      "
+
+networks:
+  rupture_network:
+    driver: bridge
