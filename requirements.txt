@@ -13,3 +13,4 @@ cx_Oracle
 python-dotenv
 openpyxl
 numpy
+requests
