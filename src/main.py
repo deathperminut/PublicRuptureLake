@@ -125,10 +125,10 @@ def GetEvents():
 def GetSpecificEvent():
     json_ = request.json
     response = getSpecificEvent(json_)
-    data = list(response)
-    if(len(data) == 0):
+    if response['status'] == 'No hay elemento':
         return {'status':'No hay elementos'}
     else:
+        data = response['data']
         lista_items = []
         # Convert each ObjectId to string within dictionaries
         for item in data:

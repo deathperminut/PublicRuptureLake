@@ -145,10 +145,52 @@ def init_web_routes(app):
         response = getSpecificEvent(objeto_)
         
         if response['status'] == 'Si hay elemento':
-            fila = response['info']
-            # Procesar datos del evento para mostrar en template
-            # (código simplificado - necesitarás adaptar la lógica completa de rl.py)
-            resp = make_response(render_template('reporte.html', **fila))
+            fila = response['data'][0]
+            
+            # Procesar fecha de reporte (hora_reg)
+            fecha_reg = datetime.datetime.strptime(fila['hora_reg'], '%Y-%m-%d %H:%M')
+            
+            # Procesar fecha de inicio
+            fecha_inicio = datetime.datetime.strptime(fila['inicio'], '%Y-%m-%d %H:%M')
+            
+            # Procesar ubicación
+            ubicacion_coords = fila['ubicacion'].split(',')
+            latitud = float(ubicacion_coords[0])
+            longitud = float(ubicacion_coords[1])
+            
+            # Procesar duración
+            duracion_segundos = fila['duracion']
+            horas = int(duracion_segundos // 3600)
+            minutos = int((duracion_segundos % 3600) // 60)
+            
+            # Preparar datos para template
+            template_data = {
+                'orden': fila['orden'],
+                'dia_reg': fecha_reg.day,
+                'mes_reg': fecha_reg.month, 
+                'año_reg': fecha_reg.year,
+                'dia_inicio': fecha_inicio.day,
+                'mes_inicio': fecha_inicio.month,
+                'año_inicio': fecha_inicio.year,
+                'latitud': latitud,
+                'longitud': longitud,
+                'volumen': round(fila['volumen'], 2),
+                'Volumenfugado': round(fila['volumen_fuga'], 2),
+                'presion_atmos': round(fila['presion_atmos'], 2),
+                'flujo': round(fila['flujo'], 2),
+                'horas': horas,
+                'minutos': minutos,
+                'area': round(fila['area'], 2),
+                'direccion': "Unidireccional" if fila['direccion'] == "uni" else "Bidireccional",
+                'forma': fila['forma'].title(),
+                'presion_tube': round(fila['presion'], 2),
+                'Tlargo': fila['dist_tube'],
+                'TlargoUni': fila['dist_tube_uni'],
+                'Subte': "Subterráneo" if fila['subte'] == "sub" else "Aéreo",
+                'aprobado': fila['aprobado']
+            }
+            
+            resp = make_response(render_template('reporte.html', **template_data))
             return resp
         else:
             resp = make_response(redirect('/BuscarEvento'))

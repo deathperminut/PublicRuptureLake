@@ -106,5 +106,9 @@ def getSpecificEvent(body):
         "orden":body['orden']
     }
     response = db.events.find(filter_)
-    return response
+    response_list = list(response)
+    if len(response_list) > 0:
+        return {'status': 'Si hay elemento', 'data': response_list}
+    else:
+        return {'status': 'No hay elemento', 'data': []}
 
