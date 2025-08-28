@@ -9,7 +9,7 @@ from functools import wraps
 
 from flask import Flask, request, send_file, render_template, make_response, redirect, url_for
 
-from functions.users import loginUserV2, createUser
+from functions.users import loginUserV2, createUser, getUsers, updateUserState, updateUserPassword, getUserById
 from functions.events import createEvent, updateEvent, getSpecificEvent, getEvents
 from functions.modelos import *
 import pandas as pd
@@ -59,7 +59,8 @@ def init_web_routes(app):
             resp.set_cookie('nombre1', result['first_name'])
             resp.set_cookie('nombre2', result['last_name'])
             resp.set_cookie('empresa', 'Efigas S.A')
-            resp.set_cookie('tipo_user', 'worker')
+            resp.set_cookie('tipo_user', 'worker')  # Mantener para compatibilidad
+            resp.set_cookie('rol', result.get('rol', 'worker'))  # Nuevo: rol del usuario
             return resp
         else:
             # Error en login - redirigir a inicio sin mensaje
@@ -200,6 +201,11 @@ def init_web_routes(app):
 
     @app.route('/Descargar', methods=['POST'])
     def downloadFile():
+        # Verificar que el usuario sea SuperAdmin
+        user_rol = request.cookies.get('rol')
+        if user_rol != 'SuperAdmin':
+            return redirect('/BuscarEvento')
+            
         response = getEvents()
         data = list(response)
         
@@ -760,3 +766,177 @@ def init_web_routes(app):
         # Esta ruta procesa el registro de admin
         resp = make_response(render_template('creado_admin.html'))
         return resp
+
+    # ===== RUTAS DE ADMINISTRACIÓN (SOLO SUPERADMIN) =====
+    
+    @app.route('/Administracion')
+    def administracion():
+        """Página de administración de usuarios - Solo SuperAdmin"""
+        # Verificar que el usuario sea SuperAdmin
+        user_rol = request.cookies.get('rol')
+        if user_rol != 'SuperAdmin':
+            return redirect('/Principal')
+            
+        # Obtener todos los usuarios
+        users_cursor = getUsers()
+        users_list = []
+        for user in users_cursor:
+            user['_id'] = str(user['_id'])  # Convertir ObjectId a string
+            users_list.append(user)
+        
+        resp = make_response(render_template('administracion.html', users=users_list))
+        return resp
+
+    @app.route('/ToggleUserState', methods=['POST'])
+    def toggle_user_state():
+        """Habilitar/Deshabilitar usuario - Solo SuperAdmin"""
+        # Verificar que el usuario sea SuperAdmin
+        user_rol = request.cookies.get('rol')
+        if user_rol != 'SuperAdmin':
+            return {'status': 'error', 'message': 'No autorizado'}, 403
+            
+        user_id = request.form.get('user_id')
+        current_state = request.form.get('current_state') == 'True'  # Convertir string a boolean
+        new_state = not current_state  # Invertir el estado
+        
+        try:
+            updateUserState(user_id, new_state)
+            return redirect('/Administracion')
+        except Exception as e:
+            print(f"Error actualizando estado: {e}")
+            return redirect('/Administracion')
+
+    @app.route('/ChangeUserPassword', methods=['POST'])
+    def change_user_password():
+        """Cambiar contraseña de usuario - Solo SuperAdmin"""
+        # Verificar que el usuario sea SuperAdmin
+        user_rol = request.cookies.get('rol')
+        if user_rol != 'SuperAdmin':
+            return {'status': 'error', 'message': 'No autorizado'}, 403
+            
+        user_id = request.form.get('user_id')
+        new_password = request.form.get('new_password')
+        
+        try:
+            updateUserPassword(user_id, new_password)
+            return redirect('/Administracion')
+        except Exception as e:
+            print(f"Error cambiando contraseña: {e}")
+            return redirect('/Administracion')
+
+    # ===== RUTAS DE CARGA MASIVA (SOLO SUPERADMIN) =====
+    
+    @app.route('/DescargarFormato', methods=['POST'])
+    def descargar_formato():
+        """Descargar formato base para carga masiva - Solo SuperAdmin"""
+        # Verificar que el usuario sea SuperAdmin
+        user_rol = request.cookies.get('rol')
+        if user_rol != 'SuperAdmin':
+            return redirect('/BuscarEvento')
+        
+        # Crear un DataFrame con las columnas necesarias (sin _id de MongoDB)
+        columnas_formato = [
+            'orden', 'ubicacion', 'presion', 'subte', 'dist_tube', 'dist_tube_uni',
+            'dist_tube2', 'dist_tube_uni2', 'diame_tube', 'Material', 'Unidades',
+            'direccion', 'forma', 'medida_rupt', 'medida_uni', 'area', 'flujo',
+            'volumen', 'inicio', 'duracion', 'hora_reg', 'presion_atmos',
+            'volumen_fuga', 'volumen_muerto', 'diame_equi', 'aprobado'
+        ]
+        
+        # Crear DataFrame vacío con las columnas
+        df_formato = pd.DataFrame(columns=columnas_formato)
+        
+        # Agregar una fila de ejemplo
+        ejemplo = {
+            'orden': 'EJEMPLO-001',
+            'ubicacion': '4.6097,-74.0817',
+            'presion': 60.0,
+            'subte': 'sub',
+            'dist_tube': 100.0,
+            'dist_tube_uni': 'm',
+            'dist_tube2': 0.0,
+            'dist_tube_uni2': 'm',
+            'diame_tube': 4.0,
+            'Material': 'Acero',
+            'Unidades': 'in',
+            'direccion': 'uni',
+            'forma': 'circ',
+            'medida_rupt': 25.4,
+            'medida_uni': 'mm',
+            'area': 506.7,
+            'flujo': 15.5,
+            'volumen': 2.5,
+            'inicio': '2024-01-15 10:30',
+            'duracion': 3600,
+            'hora_reg': '2024-01-15 11:00',
+            'presion_atmos': 14.2,
+            'volumen_fuga': 1.8,
+            'volumen_muerto': 0.7,
+            'diame_equi': 'no',
+            'aprobado': 'no'
+        }
+        df_formato = pd.concat([df_formato, pd.DataFrame([ejemplo])], ignore_index=True)
+        
+        buffer = BytesIO()
+        df_formato.to_excel(buffer, index=False, sheet_name='Formato_Eventos')
+        buffer.seek(0)
+        
+        return send_file(
+            buffer,
+            as_attachment=True,
+            download_name='formato_carga_masiva_eventos.xlsx',
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+
+    @app.route('/CargarMasivo', methods=['POST'])
+    def cargar_masivo():
+        """Cargar eventos masivamente desde Excel - Solo SuperAdmin"""
+        # Verificar que el usuario sea SuperAdmin
+        user_rol = request.cookies.get('rol')
+        if user_rol != 'SuperAdmin':
+            return redirect('/BuscarEvento')
+        
+        if 'archivo' not in request.files:
+            return redirect('/BuscarEvento')
+        
+        archivo = request.files['archivo']
+        if archivo.filename == '':
+            return redirect('/BuscarEvento')
+        
+        try:
+            # Leer el archivo Excel
+            df = pd.read_excel(archivo)
+            
+            eventos_creados = 0
+            eventos_fallidos = 0
+            
+            for index, row in df.iterrows():
+                try:
+                    # Convertir la fila a diccionario
+                    evento_data = row.to_dict()
+                    
+                    # Validar que tenga los campos obligatorios
+                    if pd.isna(evento_data.get('orden')) or evento_data.get('orden') == 'EJEMPLO-001':
+                        continue  # Saltar filas vacías o de ejemplo
+                    
+                    # Convertir tipos de datos
+                    evento_data = {k: (None if pd.isna(v) else v) for k, v in evento_data.items()}
+                    
+                    # Crear el evento
+                    response = createEvent(evento_data)
+                    if response.get('status') == 'Orden creada con éxito':
+                        eventos_creados += 1
+                    else:
+                        eventos_fallidos += 1
+                        print(f"Error creando evento {evento_data.get('orden')}: {response}")
+                        
+                except Exception as e:
+                    eventos_fallidos += 1
+                    print(f"Error procesando fila {index}: {e}")
+            
+            print(f"Carga masiva completada: {eventos_creados} creados, {eventos_fallidos} fallidos")
+            return redirect('/BuscarEvento')
+            
+        except Exception as e:
+            print(f"Error en carga masiva: {e}")
+            return redirect('/BuscarEvento')

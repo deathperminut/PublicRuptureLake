@@ -107,6 +107,11 @@
               Crear admin
             </button>
           </form>
+          <form method="GET" id="adminPanel" class="principal-form" action="Administracion" style="display: none;">
+            <button type="submit" class="principal-report-btn button">
+              <i class="fas fa-users-cog"></i> Administración
+            </button>
+          </form>
         </div>
     </div>
 
@@ -150,6 +155,11 @@
       /// PREGUNTAR EL TEMA DEL ADMIN
       if (getCookie("tipo_user") != "1"){
         document.getElementById("crearAdmin").style.display = "none";
+      }
+      
+      // Mostrar botón de administración solo a SuperAdmin
+      if (getCookie("rol") == "SuperAdmin") {
+        document.getElementById("adminPanel").style.display = "block";
       }
     }
 

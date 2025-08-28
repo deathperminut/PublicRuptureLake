@@ -14,7 +14,7 @@ load_dotenv()
 ### FUNCIONES MONGODB ########
 ##############################
 
-from functions.users import createUser,deleteUser,updateUser,getUsers,loginUserV2,hash_password
+from functions.users import createUser,deleteUser,updateUser,getUsers,loginUserV2,hash_password,createSuperAdmin
 from functions.events import createEvent,deleteEvent,updateEvent,getEvents,getSpecificEvent
 import pandas as pd
 import bcrypt
@@ -166,9 +166,12 @@ def UpdateEvent():
         status_code = 200
     return jsonify(response), status_code
 
-
-
-
+@app.route('/rupture/createSuperAdmin', methods=['POST'])
+def CreateSuperAdmin():
+    """Ruta para crear SuperAdmin - usar con precaución"""
+    data = request.json
+    response = createSuperAdmin(data)
+    return response, 201
 
 if __name__=='__main__':
     host = os.getenv('FLASK_HOST')

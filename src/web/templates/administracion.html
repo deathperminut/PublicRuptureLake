@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Administración de Usuarios</title>
+    <meta property="og:title" content="Administración" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8" />
+    <meta property="twitter:card" content="summary_large_image" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/principal.css') }}" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/697919b5b5.js" crossorigin="anonymous"></script>
+  </head>
+  <body style="background-image: url('{{ url_for('static', filename='images/Fondo.png') }}')">
+    <div class="principal-header">
+      <div class="principal-app-container">
+        <form method="GET" action="Inicio">
+          <button type="submit" class="principal-button button">
+            <i class="fa fa-right-from-bracket"></i>
+          </button>
+        </form>
+        <img
+          alt="Logo FuGas"
+          src="{{ url_for('static', filename='images/logos/RL_logo.png') }}"
+          class="principal-image"
+        />
+      </div>
+    </div>
+
+    <div class="container mt-4">
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header bg-primary text-white">
+              <h3><i class="fas fa-users-cog"></i> Administración de Usuarios</h3>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                  <thead class="table-dark">
+                    <tr>
+                      <th>Nombre</th>
+                      <th>Email</th>
+                      <th>Identificación</th>
+                      <th>Rol</th>
+                      <th>Estado</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for user in users %}
+                    <tr>
+                      <td>{{ user.first_name }} {{ user.last_name }}</td>
+                      <td>{{ user.email }}</td>
+                      <td>{{ user.identification }}</td>
+                      <td>
+                        <span class="badge {% if user.rol == 'SuperAdmin' %}bg-danger{% else %}bg-secondary{% endif %}">
+                          {{ user.rol }}
+                        </span>
+                      </td>
+                      <td>
+                        <span class="badge {% if user.state %}bg-success{% else %}bg-warning{% endif %}">
+                          {% if user.state %}Habilitado{% else %}Deshabilitado{% endif %}
+                        </span>
+                      </td>
+                      <td>
+                        <div class="btn-group" role="group">
+                          <!-- Botón para cambiar estado -->
+                          <form method="POST" action="/ToggleUserState" style="display: inline;">
+                            <input type="hidden" name="user_id" value="{{ user._id }}">
+                            <input type="hidden" name="current_state" value="{{ user.state }}">
+                            <button type="submit" class="btn btn-sm {% if user.state %}btn-warning{% else %}btn-success{% endif %}">
+                              {% if user.state %}
+                                <i class="fas fa-user-slash"></i> Deshabilitar
+                              {% else %}
+                                <i class="fas fa-user-check"></i> Habilitar
+                              {% endif %}
+                            </button>
+                          </form>
+                          
+                          <!-- Botón para cambiar contraseña -->
+                          <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#passwordModal{{ loop.index }}">
+                            <i class="fas fa-key"></i> Cambiar Contraseña
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                    
+                    <!-- Modal para cambiar contraseña -->
+                    <div class="modal fade" id="passwordModal{{ loop.index }}" tabindex="-1">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title">Cambiar Contraseña - {{ user.first_name }} {{ user.last_name }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                          </div>
+                          <form method="POST" action="/ChangeUserPassword">
+                            <div class="modal-body">
+                              <input type="hidden" name="user_id" value="{{ user._id }}">
+                              <div class="mb-3">
+                                <label for="newPassword{{ loop.index }}" class="form-label">Nueva Contraseña</label>
+                                <input type="password" class="form-control" id="newPassword{{ loop.index }}" name="new_password" required minlength="6">
+                                <div class="form-text">Mínimo 6 caracteres</div>
+                              </div>
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                              <button type="submit" class="btn btn-primary">Cambiar Contraseña</button>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              
+              <div class="text-center mt-4">
+                <a href="/Perfil" class="btn btn-secondary">
+                  <i class="fas fa-arrow-left"></i> Volver al Perfil
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

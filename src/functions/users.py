@@ -28,10 +28,40 @@ def createUser(body):
         if 'password' in body:
             body['password'] = hash_password(body['password'])
         
+        # Establecer valores por defecto si no están definidos
+        if 'rol' not in body or body['rol'] not in ['worker', 'SuperAdmin']:
+            body['rol'] = 'worker'  # Por defecto es worker
+            
+        if 'state' not in body:
+            body['state'] = True  # Por defecto habilitado (true = enabled, false = disabled)
+        
         response = db.users.insert_one(
             body
         )
         return {'status':'Usuario creado con éxito'}
+
+def createSuperAdmin(body):
+    """Crear un usuario SuperAdmin - para uso en APIs o scripts de inicialización"""
+    client = getInstance()
+    db = client["rupture"]
+    
+    # Verificar si ya existe
+    filter_ = {"identification": body['identification']}
+    response = db.users.find(filter_)
+    response = list(response)
+    if len(response) != 0:
+        return {'status': 'Usuario con cédula ya existente'}
+    
+    # Hashear contraseña
+    if 'password' in body:
+        body['password'] = hash_password(body['password'])
+    
+    # Forzar rol SuperAdmin y estado habilitado
+    body['rol'] = 'SuperAdmin'
+    body['state'] = True
+    
+    response = db.users.insert_one(body)
+    return {'status': 'SuperAdmin creado con éxito'}
 
 ###################
 #### UPDATE #######
@@ -111,6 +141,11 @@ def loginUserV2(body):
     else:
         ## VALIDAMOS EL HASH DE LA CONTRASEÑA
         user_ = response[0]
+        
+        # Verificar si el usuario está habilitado (true = habilitado, false = deshabilitado)
+        if user_.get('state', True) == False:
+            return {'status':'Usuario deshabilitado. Contacte al administrador'}
+        
         answer = verificar_password(user_['password'], body['password'])
         if(answer):
             user_body = response[0]
@@ -124,5 +159,33 @@ def GetSpecificUser(dni):
     db = client["rupture"]
     filter_ = {"dni":dni}
     response = db.users.find(filter_)
+    return response
+
+def updateUserState(user_id, new_state_bool):
+    """Actualizar el estado (habilitado/deshabilitado) de un usuario"""
+    client = getInstance()
+    db = client["rupture"]
+    filter_ = {"_id": ObjectId(user_id)}
+    # new_state_bool debe ser True (habilitado) o False (deshabilitado)
+    update = {"$set": {"state": new_state_bool}}
+    response = db.users.update_one(filter_, update)
+    return response
+
+def updateUserPassword(user_id, new_password):
+    """Cambiar la contraseña de un usuario (solo SuperAdmin)"""
+    client = getInstance()
+    db = client["rupture"]
+    hashed_password = hash_password(new_password)
+    filter_ = {"_id": ObjectId(user_id)}
+    update = {"$set": {"password": hashed_password}}
+    response = db.users.update_one(filter_, update)
+    return response
+
+def getUserById(user_id):
+    """Obtener un usuario específico por ID"""
+    client = getInstance()
+    db = client["rupture"]
+    filter_ = {"_id": ObjectId(user_id)}
+    response = db.users.find_one(filter_)
     return response
 
