@@ -940,3 +940,467 @@ def init_web_routes(app):
         except Exception as e:
             print(f"Error en carga masiva: {e}")
             return redirect('/BuscarEvento')
+
+    # ===== NUEVA PÁGINA DE CARGA MASIVA DEDICADA =====
+    
+    @app.route('/CargaMasiva')
+    def carga_masiva():
+        """Página dedicada para carga masiva - SuperAdmin y worker"""
+        # Verificar que el usuario sea SuperAdmin o worker
+        user_rol = request.cookies.get('rol')
+        if user_rol not in ['SuperAdmin', 'worker']:
+            return redirect('/Perfil')
+            
+        resp = make_response(render_template('carga_masiva.html'))
+        return resp
+
+    @app.route('/DescargarFormatoSimple', methods=['POST'])
+    def descargar_formato_simple():
+        """Descargar formato simplificado basado en formulario de crear evento"""
+        # Verificar que el usuario sea SuperAdmin o worker
+        user_rol = request.cookies.get('rol')
+        if user_rol not in ['SuperAdmin', 'worker']:
+            return redirect('/CargaMasiva')
+        
+        # Campos que el usuario llena en el formulario (sin cálculos)
+        columnas_formulario = [
+            'orden',
+            'ubicacion', 
+            'presion',
+            'presionUni',
+            'subte',
+            'diameEqui',
+            'escape',
+            'Flujo',
+            'Forma', 
+            'DiameFuga',
+            'DiameFugaUni',
+            'LongiFuga',
+            'LongiFugaUni',
+            'DistTube',
+            'DistTubeUni', 
+            'DistTube2',
+            'DistTubeUni2',
+            'DiameTube',
+            'tiempoInicio',
+            'tiempoFin'
+        ]
+        
+        # Crear DataFrame con ejemplo
+        df_formato = pd.DataFrame(columns=columnas_formulario)
+        
+        # Agregar fila de ejemplo con datos realistas del formulario  
+        ejemplo = {
+            'orden': 'CAMBIAR_POR_TU_ORDEN_001',
+            'ubicacion': '4.6097,-74.0817',
+            'presion': 60.0,
+            'presionUni': 'psig',
+            'subte': 'sub',
+            'diameEqui': 'off',
+            'escape': 1,
+            'Flujo': 'uni', 
+            'Forma': 'circ',
+            'DiameFuga': 25.4,
+            'DiameFugaUni': 'mm',
+            'LongiFuga': '',
+            'LongiFugaUni': 'mm',
+            'DistTube': 100.0,
+            'DistTubeUni': 'm',
+            'DistTube2': '',
+            'DistTubeUni2': 'm',
+            'DiameTube': 4.0,
+            'tiempoInicio': '2024-01-15T10:30',
+            'tiempoFin': '2024-01-15T11:30'
+        }
+        df_formato = pd.concat([df_formato, pd.DataFrame([ejemplo])], ignore_index=True)
+        
+        # Crear archivo Excel con múltiples hojas
+        buffer = io.BytesIO()
+        try:
+            # Intentar usar xlsxwriter para mejor funcionalidad
+            with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+                crear_excel_completo(writer, df_formato)
+        except ImportError:
+            # Fallback a openpyxl si xlsxwriter no está disponible
+            buffer = io.BytesIO()
+            with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+                crear_excel_completo(writer, df_formato)
+        
+        buffer.seek(0)
+        
+        return send_file(
+            buffer,
+            as_attachment=True,
+            download_name='formato_carga_masiva_simplificado.xlsx',
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+
+    def crear_excel_completo(writer, df_formato):
+        """Función auxiliar para crear el Excel con múltiples hojas"""
+        # Hoja principal con datos
+        df_formato.to_excel(writer, sheet_name='Eventos', index=False)
+        
+        # Crear hoja de opciones válidas
+        opciones_data = {
+            'presionUni_opciones': ['psig', 'bar', 'kPa'],
+            'subte_opciones': ['sub', 'superficial'],
+            'Flujo_opciones': ['uni', 'bi'],
+            'Forma_opciones': ['circ', 'rect', 'tria', 'recta', 'total'],
+            'diameEqui_opciones': ['on', 'off'],
+            'DiameFugaUni_opciones': ['mm', 'in'],
+            'LongiFugaUni_opciones': ['mm', 'in'],
+            'DistTubeUni_opciones': ['m', 'ft'],
+            'DistTubeUni2_opciones': ['m', 'ft']
+        }
+        
+        # Crear hoja de opciones válidas
+        opciones_df = pd.DataFrame(dict([(k, pd.Series(v)) for k, v in opciones_data.items()]))
+        opciones_df.to_excel(writer, sheet_name='Opciones_Validas', index=False)
+        
+        # Hoja de diámetros de tubería comunes
+        diametros_tuberia = pd.DataFrame({
+            'DiameTube_comunes': [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0, 10.0, 12.0, 16.0, 20.0, 24.0],
+            'Descripcion': ['1/2"', '3/4"', '1"', '1 1/4"', '1 1/2"', '2"', '3"', '4"', '6"', '8"', '10"', '12"', '16"', '20"', '24"']
+        })
+        diametros_tuberia.to_excel(writer, sheet_name='Diametros_Tuberia', index=False)
+        
+        # Crear hoja de instrucciones mejoradas
+        instrucciones = pd.DataFrame([
+            ['INSTRUCCIONES PARA CARGA MASIVA DE EVENTOS'],
+            [''],
+            ['PASO A PASO:'],
+            ['1. IMPORTANTE: Cambia "CAMBIAR_POR_TU_ORDEN_001" por un código único'],
+            ['2. Llena tus datos usando las opciones válidas de las otras hojas'],
+            ['3. Guarda el archivo y súbelo en la página web'],
+            [''],
+            ['CAMPOS OBLIGATORIOS:'],
+            ['- orden: Número único (ej: EV-2024-001, RUPTURA-001, etc)'],
+            ['- ubicacion: Lat,Lng (ej: 4.6097,-74.0817) - usar Google Maps'],
+            ['- presion: Número (ej: 60, 45.5, 120)'],
+            ['- presionUni: Ver hoja "Opciones_Validas" (psig, bar, kPa)'],
+            ['- subte: Ver hoja "Opciones_Validas" (sub o superficial)'],
+            ['- Flujo: Ver hoja "Opciones_Validas" (uni o bi)'],
+            ['- Forma: Ver hoja "Opciones_Validas" (circ, rect, tria, recta, total)'],
+            ['- DiameTube: Ver hoja "Diametros_Tuberia" para valores comunes'],
+            ['- tiempoInicio: YYYY-MM-DDTHH:MM (ej: 2024-01-15T10:30)'],
+            ['- tiempoFin: YYYY-MM-DDTHH:MM (ej: 2024-01-15T11:30)'],
+            [''],
+            ['CAMPOS SEGÚN TIPO DE RUPTURA:'],
+            ['- Si Forma = circ: llenar DiameFuga y DiameFugaUni'],
+            ['- Si Forma = recta: llenar LongiFuga y LongiFugaUni'],
+            ['- Si Forma = rect/tria: llenar DiameFuga como el lado/radio'],
+            ['- Si Forma = total: dejar DiameFuga vacío'],
+            [''],
+            ['CAMPOS OPCIONALES:'],
+            ['- diameEqui: "on" para usar diámetro equivalente, "off" para no usar'],
+            ['- escape: Número (1-5) para cálculo de diámetro equivalente'],
+            ['- DistTube: Distancia a primera válvula (número)'],
+            ['- DistTube2: Distancia a segunda válvula (solo si Flujo=bi)'],
+            ['- DistTubeUni/DistTubeUni2: Ver opciones (m o ft)'],
+            [''],
+            ['EJEMPLOS DE DATOS VÁLIDOS:'],
+            ['presionUni: psig, bar, kPa'],
+            ['subte: sub, superficial'],
+            ['Flujo: uni, bi'],
+            ['Forma: circ, rect, tria, recta, total'],
+            ['diameEqui: on, off'],
+            [''],
+            ['NOTAS IMPORTANTES:'],
+            ['- Usar punto (.) como separador decimal, no coma'],
+            ['- Coordenadas con punto como decimal: 4.6097,-74.0817'],
+            ['- Fechas en formato ISO: 2024-01-15T10:30'],
+            ['- Eliminar SIEMPRE la fila de ejemplo antes de subir'],
+            ['- Los cálculos complejos se harán automáticamente']
+        ])
+        instrucciones.to_excel(writer, sheet_name='Instrucciones', index=False, header=False)
+
+    def procesar_evento_desde_excel(form_data):
+        """Procesar un evento usando los mismos cálculos que /Resultados"""
+        try:
+            # Extraer datos del diccionario (simulando request.form.get)
+            orden = form_data.get('orden', '')
+            ubicacion = form_data.get('ubicacion', '') 
+            presionTub = form_data.get('presion', '')
+            presionUni = form_data.get('presionUni', 'psig')
+            subte = form_data.get('subte', 'sub')
+            equi = 'on' if form_data.get('diameEqui', '').lower() == 'on' else None
+            escape = form_data.get('escape', '1')
+            direccion = form_data.get('Flujo', 'uni')
+            forma = form_data.get('Forma', 'circ')
+            Fdiametro = form_data.get('DiameFuga', '')
+            longitud = form_data.get('LongiFuga', '')
+            FdiametroUni = form_data.get('DiameFugaUni', 'mm')
+            longitudUni = form_data.get('LongiFugaUni', 'mm')
+            Tlargo = form_data.get('DistTube', '')
+            TlargoUni = form_data.get('DistTubeUni', 'm')
+            Tlargo2 = form_data.get('DistTube2', '')
+            TlargoUni2 = form_data.get('DistTubeUni2', 'm')
+            Tdiametro = form_data.get('DiameTube', '')
+            tiempoInicio = form_data.get('tiempoInicio', '')
+            tiempoFin = form_data.get('tiempoFin', '')
+            
+            # Validaciones básicas más detalladas
+            campos_vacios = []
+            if not orden: campos_vacios.append('orden')
+            if not ubicacion: campos_vacios.append('ubicacion')
+            if not presionTub: campos_vacios.append('presion')
+            if not Tdiametro: campos_vacios.append('DiameTube')
+            if not tiempoInicio: campos_vacios.append('tiempoInicio')
+            if not tiempoFin: campos_vacios.append('tiempoFin')
+            
+            if campos_vacios:
+                return {'status': 'error', 'error': f'Campos obligatorios faltantes: {", ".join(campos_vacios)}'}
+                
+            # Validación especial para ejemplo
+            if orden.upper().startswith('EJEMPLO') or orden.upper().startswith('CAMBIAR'):
+                return {'status': 'error', 'error': 'Debes cambiar la orden de ejemplo por un valor único (ej: EV-2024-001, RUPTURA-001)'}
+            
+            # Conversiones de tipos (misma lógica que /Resultados)
+            presionTub = float(presionTub)
+            Fdiametro = float(Fdiametro) if Fdiametro != "" else 0
+            Tlargo = float(Tlargo) if Tlargo != "" else 0
+            Tlargo2 = float(Tlargo2) if Tlargo2 != "" else 0
+            longitud = float(longitud) if longitud != "" else 0
+            Tdiametro = float(Tdiametro)
+            
+            # Aplicar los diametros equivalentes
+            if equi == 'on':
+                Fuga_diame = convertir("in", "mm", diametro_equi(Tdiametro, escape))
+            else:
+                Fuga_diame = convertir(FdiametroUni, "mm", Fdiametro)
+            
+            # Convertir a mm y m para que concuerden las unidades
+            diametro_int = diametro_interno(Tdiametro)
+            material = diametro_interno1(Tdiametro)
+            Unidades = diametro_interno2(Tdiametro)
+            Tlargo = convertir(TlargoUni, "m", Tlargo)
+            Tlargo2 = convertir(TlargoUni2, "m", Tlargo2)
+            longitud = convertir(longitudUni, "mm", longitud)
+            
+            TubeLargo = Tlargo + Tlargo2
+            
+            # Separar los componentes de la ubicacion
+            lati = float(ubicacion.split(",")[0])
+            longi = float(ubicacion.split(",")[1])
+            
+            # Convertir a bar para que concuerden las unidades de presion
+            presionTub = convertir(presionUni, "bar", presionTub)
+            
+            # Traer presion atmos
+            presionAtmos = presion_atmos(elevacion(lati, longi))
+            
+            # Procesar fechas
+            tiempoInicio = datetime.datetime.fromisoformat(tiempoInicio.replace('T', ' '))
+            tiempoFin = datetime.datetime.fromisoformat(tiempoFin.replace('T', ' '))
+            duracion = tiempoFin - tiempoInicio
+            duracion = duracion.total_seconds()
+            horas = int(duracion // 3600)
+            horasQ = duracion % 3600
+            minutos = int(horasQ // 60)
+            duracion2 = duracion / 3600
+            
+            # Cálculos de ruptura (misma lógica que /Resultados)
+            if forma == "total":
+                Fuga_diame = diametro_int
+                area = calc_area("circ", Fuga_diame, 0, 0, 0)
+                perimetro = calc_peri("circ", Fuga_diame, 0, 0, 0)
+            elif forma == "recta":
+                if equi == 'on':
+                    area = calc_area("circ", Fuga_diame, 0, 0, 0)
+                    perimetro = calc_peri("circ", Fuga_diame, 0, 0, 0)
+                else:
+                    area = calc_area("recta", 0, 0, 0, longitud)
+                    perimetro = calc_peri("recta", 0, 0, 0, longitud)
+                    Fuga_diame = diametro_hidraulico(area, perimetro, diametro_int)
+            else:
+                area = calc_area(forma, Fuga_diame, 0, 0, longitud)
+                perimetro = calc_peri(forma, Fuga_diame, 0, 0, longitud)
+            
+            if forma == "rect" or forma == "recta":
+                coef_flujo = 0.9
+            elif forma == "tria":
+                coef_flujo = 0.95
+            else:
+                coef_flujo = 1
+            
+            if forma == "recta":
+                forma = "Recta"
+                medida = longitud
+                medidaUni = longitudUni
+            elif forma == "total":
+                forma = "Total"
+                medida = ""
+                medidaUni = ""
+            else:
+                forma = "Circular"
+                medida = Fdiametro
+                medidaUni = FdiametroUni
+            
+            # NUEVO METODO DE CALCULO DEL FLUJO (igual que /Resultados)
+            R_vals = np.array([0.0, 0.25, 0.5, 0.75, 1.0])
+            R_real = 1.0 if forma == "Total" else Fuga_diame / diametro_int
+            Q_vals = []
+            
+            if diametro_int > 76.2:
+                d1 = 50.8
+                d2 = 76.2
+                Q1_vals = []
+                Q2_vals = []
+                for R in R_vals:
+                    R_actual = 1.0 if forma == "Total" else R
+                    Q1_iter = []
+                    Q2_iter = []
+
+                    for d_tube_i, Q_iter in zip([d1, d2], [Q1_iter, Q2_iter]):
+                        L0 = obtener_L0(R_actual, material)
+                        if TubeLargo <= L0:
+                            Q0 = modelo_utpSuper(Fuga_diame, d_tube_i, presionTub, presionAtmos, subte, direccion, forma, TubeLargo, material, R_actual)
+                            Q_iter.append(Q0)
+                        else:
+                            Q0 = modelo_utpSuper(Fuga_diame, d_tube_i, presionTub, presionAtmos, subte, direccion, forma, L0, material, R_actual)
+                            Q_iter.append(Q0)
+                            for L in range(L0 + 1, int(TubeLargo) + 1):
+                                a = alpha(L, R_actual, material)
+                                Qi = Q_iter[-1] if a is None else Q_iter[-1] * (1 - a)
+                                Q_iter.append(Qi)
+
+                    Q1_vals.append(Q1_iter[-1])
+                    Q2_vals.append(Q2_iter[-1])
+
+                Q1_interp = np.interp(R_real, R_vals, Q1_vals)
+                Q2_interp = np.interp(R_real, R_vals, Q2_vals)
+                Q_extrap = Q1_interp + (Q2_interp - Q1_interp) * ((diametro_int - d1) / (d2 - d1))
+                flujo = Q_extrap
+            else:
+                for R in R_vals:
+                    R_actual = 1.0 if forma == "Total" else R
+                    Q_iter = []
+                    L0 = obtener_L0(R_actual, material)
+
+                    if TubeLargo <= L0:
+                        Q0 = modelo_utpSuper(Fuga_diame, diametro_int, presionTub, presionAtmos, subte, direccion, forma, TubeLargo, material, R_actual)
+                        Q_iter.append(Q0)
+                    else:
+                        Q0 = modelo_utpSuper(Fuga_diame, diametro_int, presionTub, presionAtmos, subte, direccion, forma, L0, material, R_actual)
+                        Q_iter.append(Q0)
+                        for L in range(L0 + 1, int(TubeLargo) + 1):
+                            a = alpha(L, R_actual, material)
+                            Qi = Q_iter[-1] if a is None else Q_iter[-1] * (1 - a)
+                            Q_iter.append(Qi)
+
+                    Q_vals.append(Q_iter[-1])
+
+                Q_final = np.interp(R_real, R_vals, Q_vals)
+                flujo = Q_final
+            
+            # Calcular volumenes
+            vol_muerto_calc = vol_muerto(diametro_int, TubeLargo)
+            Volumenfugado = (flujo * duracion2)
+            volumen = Volumenfugado + vol_muerto_calc
+            TubeLargo = convertir("m", TlargoUni, TubeLargo)
+            
+            # Crear objeto para la base de datos
+            evento_data = {
+                'orden': orden,
+                'ubicacion': ubicacion,
+                'presion': convertir("bar", "psig", presionTub),
+                'subte': subte,
+                'dist_tube': Tlargo,
+                'dist_tube_uni': TlargoUni,
+                'dist_tube2': Tlargo2,
+                'dist_tube_uni2': TlargoUni2,
+                'diame_tube': Tdiametro,
+                'Material': material,
+                'Unidades': Unidades,
+                'direccion': direccion,
+                'forma': forma,
+                'medida_rupt': medida,
+                'medida_uni': medidaUni,
+                'area': area,
+                'flujo': float(flujo),
+                'volumen': float(volumen),
+                'inicio': tiempoInicio.strftime('%Y-%m-%d %H:%M'),
+                'duracion': duracion,
+                'hora_reg': datetime.datetime.now().strftime('%Y-%m-%d %H:%M'),
+                'presion_atmos': float(presionAtmos),
+                'volumen_fuga': float(Volumenfugado),
+                'volumen_muerto': float(vol_muerto_calc),
+                'diame_equi': escape if equi == "on" else 'no',
+                'aprobado': 'no'
+            }
+            
+            # Guardar en base de datos
+            response = createEvent(evento_data)
+            
+            if response.get('status') == 'Orden creada con éxito':
+                return {'status': 'exito'}
+            else:
+                # Manejar específicamente el error de orden duplicada
+                error_msg = response.get('status', 'Error desconocido')
+                if 'éxiste una orden registrada' in error_msg:
+                    error_msg = f'La orden "{orden}" ya existe. Usa un número único diferente'
+                return {'status': 'error', 'error': error_msg}
+                
+        except Exception as e:
+            return {'status': 'error', 'error': str(e)}
+
+    @app.route('/ProcesarCargaMasiva', methods=['POST'])
+    def procesar_carga_masiva():
+        """Procesar carga masiva usando lógica del formulario"""
+        # Verificar que el usuario sea SuperAdmin o worker
+        user_rol = request.cookies.get('rol')
+        if user_rol not in ['SuperAdmin', 'worker']:
+            return {'error': 'No autorizado'}, 403
+        
+        if 'archivo' not in request.files:
+            return {'error': 'No se encontró archivo'}, 400
+        
+        archivo = request.files['archivo']
+        if archivo.filename == '':
+            return {'error': 'Archivo vacío'}, 400
+        
+        try:
+            # Leer el archivo Excel
+            df = pd.read_excel(archivo, sheet_name='Eventos')
+            
+            eventos_creados = 0
+            eventos_fallidos = 0
+            errores = []
+            
+            for index, row in df.iterrows():
+                try:
+                    # Saltar filas vacías o de ejemplo
+                    if pd.isna(row.get('orden')) or row.get('orden') in ['EJEMPLO-001', 'EV-2024-001']:
+                        continue
+                    
+                    # Simular el llenado del formulario de crear evento
+                    form_data = {}
+                    for col in df.columns:
+                        form_data[col] = '' if pd.isna(row[col]) else str(row[col])
+                    
+                    # Procesar usando la misma lógica que /Resultados
+                    resultado = procesar_evento_desde_excel(form_data)
+                    
+                    if resultado['status'] == 'exito':
+                        eventos_creados += 1
+                    else:
+                        eventos_fallidos += 1
+                        errores.append(f"Fila {index + 2}: {resultado['error']}")
+                        
+                except Exception as e:
+                    eventos_fallidos += 1
+                    errores.append(f"Fila {index + 2}: {str(e)}")
+            
+            # Log para debugging
+            print(f"Carga masiva completada: {eventos_creados} creados, {eventos_fallidos} fallidos")
+            for error in errores[:5]:  # Mostrar primeros 5 errores en consola
+                print(f"Error: {error}")
+                
+            return {
+                'eventos_creados': eventos_creados,
+                'eventos_fallidos': eventos_fallidos,
+                'errores': errores[:10]  # Limitar a 10 errores para no sobrecargar
+            }
+            
+        except Exception as e:
+            return {'error': f'Error procesando archivo: {str(e)}'}, 500

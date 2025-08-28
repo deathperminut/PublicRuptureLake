@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Carga Masiva de Eventos</title>
+    <meta property="og:title" content="Carga Masiva" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8" />
+    <meta property="twitter:card" content="summary_large_image" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/principal.css') }}" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/697919b5b5.js" crossorigin="anonymous"></script>
+    <style>
+      .upload-area {
+        border: 2px dashed #4a90e2;
+        border-radius: 10px;
+        padding: 40px;
+        text-align: center;
+        background-color: #f8f9fa;
+        transition: all 0.3s ease;
+        cursor: pointer;
+      }
+      .upload-area:hover {
+        border-color: #357abd;
+        background-color: #e3f2fd;
+      }
+      .upload-area.dragover {
+        border-color: #28a745;
+        background-color: #d4edda;
+      }
+      .upload-icon {
+        font-size: 48px;
+        color: #4a90e2;
+        margin-bottom: 20px;
+      }
+      .step-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+      .step-number {
+        background: #4a90e2;
+        color: white;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-right: 10px;
+      }
+      .file-info {
+        background: #e8f5e8;
+        border: 1px solid #28a745;
+        border-radius: 5px;
+        padding: 10px;
+        margin-top: 10px;
+      }
+      .progress-bar {
+        height: 25px;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body style="background-image: url('{{ url_for('static', filename='images/Fondo.png') }}')">
+    <div class="principal-header">
+      <div class="principal-app-container">
+        <form method="GET" action="Inicio">
+          <button type="submit" class="principal-button button">
+            <i class="fa fa-right-from-bracket"></i>
+          </button>
+        </form>
+        <img
+          alt="Logo FuGas"
+          src="{{ url_for('static', filename='images/logos/RL_logo.png') }}"
+          class="principal-image"
+        />
+      </div>
+    </div>
+
+    <div class="container mt-4">
+      <div class="row">
+        <div class="col-12">
+          <div class="text-center mb-4">
+            <h2 class="text-primary">
+              <i class="fas fa-cloud-upload-alt"></i>
+              Carga Masiva de Eventos
+            </h2>
+            <p class="text-muted">Sube múltiples eventos desde un archivo Excel de forma rápida y sencilla</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- Paso 1: Descargar Formato -->
+        <div class="col-md-6">
+          <div class="step-card">
+            <h4><span class="step-number">1</span>Descargar Formato</h4>
+            <p class="text-muted">Descarga el archivo Excel con el formato requerido para la carga masiva.</p>
+            <form method="POST" action="/DescargarFormatoSimple">
+              <button type="submit" class="btn btn-success btn-lg w-100">
+                <i class="fas fa-download"></i>
+                Descargar Formato Excel
+              </button>
+            </form>
+            <small class="text-muted mt-2 d-block">
+              <i class="fas fa-info-circle"></i>
+              El formato incluye solo los campos necesarios que normalmente llenas en el formulario
+            </small>
+          </div>
+        </div>
+
+        <!-- Paso 2: Llenar Datos -->
+        <div class="col-md-6">
+          <div class="step-card">
+            <h4><span class="step-number">2</span>Llenar Datos</h4>
+            <p class="text-muted">Completa el archivo Excel con la información de tus eventos.</p>
+            <div class="alert alert-info">
+              <h6><i class="fas fa-lightbulb"></i> Datos requeridos:</h6>
+              <ul class="mb-0">
+                <li>Número de orden</li>
+                <li>Ubicación (coordenadas)</li>
+                <li>Presión y unidades</li>
+                <li>Fechas de inicio y fin</li>
+                <li>Características de tubería y ruptura</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Paso 3: Subir Archivo -->
+      <div class="row">
+        <div class="col-12">
+          <div class="step-card">
+            <h4><span class="step-number">3</span>Subir Archivo</h4>
+            <form id="uploadForm" method="POST" action="/ProcesarCargaMasiva" enctype="multipart/form-data">
+              <div class="upload-area" id="uploadArea" onclick="document.getElementById('archivo').click()">
+                <div class="upload-icon">
+                  <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <h5>Arrastra tu archivo aquí o haz clic para seleccionar</h5>
+                <p class="text-muted">Formatos soportados: .xlsx, .xls</p>
+                <input type="file" id="archivo" name="archivo" accept=".xlsx,.xls" style="display: none;" required>
+                <div id="fileInfo" class="file-info" style="display: none;">
+                  <i class="fas fa-file-excel text-success"></i>
+                  <span id="fileName"></span>
+                  <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="clearFile()">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </div>
+              
+              <div class="text-center mt-4">
+                <button type="submit" class="btn btn-primary btn-lg" id="uploadBtn" disabled>
+                  <i class="fas fa-upload"></i>
+                  Procesar Carga Masiva
+                </button>
+              </div>
+            </form>
+
+            <!-- Progreso de carga -->
+            <div id="progressContainer" class="mt-4" style="display: none;">
+              <h6>Procesando eventos...</h6>
+              <div class="progress">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" id="progressBar" 
+                     role="progressbar" style="width: 0%">
+                  0%
+                </div>
+              </div>
+              <div id="progressText" class="text-center mt-2">
+                Iniciando procesamiento...
+              </div>
+            </div>
+
+            <!-- Resultados -->
+            <div id="resultContainer" class="mt-4" style="display: none;">
+              <div id="resultAlert" class="alert">
+                <h6><i id="resultIcon"></i> <span id="resultTitle"></span></h6>
+                <p id="resultText"></p>
+                <div id="errorDetails" style="display: none;">
+                  <hr>
+                  <h6>Detalles de errores:</h6>
+                  <ul id="errorList"></ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Volver al menú -->
+      <div class="row">
+        <div class="col-12 text-center">
+          <a href="/Perfil" class="btn btn-secondary btn-lg">
+            <i class="fas fa-arrow-left"></i>
+            Volver al Perfil
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      const uploadArea = document.getElementById('uploadArea');
+      const fileInput = document.getElementById('archivo');
+      const fileInfo = document.getElementById('fileInfo');
+      const fileName = document.getElementById('fileName');
+      const uploadBtn = document.getElementById('uploadBtn');
+
+      // Drag and drop functionality
+      uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+      });
+
+      uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+      });
+
+      uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+          const file = files[0];
+          if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+            fileInput.files = files;
+            showFileInfo(file.name);
+          } else {
+            alert('Por favor selecciona un archivo Excel (.xlsx o .xls)');
+          }
+        }
+      });
+
+      // File input change
+      fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+          showFileInfo(e.target.files[0].name);
+        }
+      });
+
+      function showFileInfo(name) {
+        fileName.textContent = name;
+        fileInfo.style.display = 'block';
+        uploadBtn.disabled = false;
+      }
+
+      function clearFile() {
+        fileInput.value = '';
+        fileInfo.style.display = 'none';
+        uploadBtn.disabled = true;
+      }
+
+      // Form submission with progress
+      document.getElementById('uploadForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData();
+        formData.append('archivo', fileInput.files[0]);
+        
+        // Show progress
+        document.getElementById('progressContainer').style.display = 'block';
+        uploadBtn.disabled = true;
+        
+        // Simulate progress (in real implementation, you'd use server-sent events or websockets)
+        let progress = 0;
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        
+        const progressInterval = setInterval(() => {
+          progress += Math.random() * 20;
+          if (progress > 90) progress = 90;
+          
+          progressBar.style.width = progress + '%';
+          progressBar.textContent = Math.round(progress) + '%';
+          progressText.textContent = 'Procesando eventos... ' + Math.round(progress) + '%';
+        }, 500);
+
+        // Submit form
+        fetch('/ProcesarCargaMasiva', {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          clearInterval(progressInterval);
+          
+          // Complete progress
+          progressBar.style.width = '100%';
+          progressBar.textContent = '100%';
+          progressText.textContent = 'Completado';
+          
+          setTimeout(() => {
+            document.getElementById('progressContainer').style.display = 'none';
+            document.getElementById('resultContainer').style.display = 'block';
+            
+            const resultAlert = document.getElementById('resultAlert');
+            const resultIcon = document.getElementById('resultIcon');
+            const resultTitle = document.getElementById('resultTitle');
+            const resultText = document.getElementById('resultText');
+            const errorDetails = document.getElementById('errorDetails');
+            const errorList = document.getElementById('errorList');
+            
+            // Determinar el tipo de resultado
+            if (data.eventos_fallidos === 0) {
+              // Todo exitoso
+              resultAlert.className = 'alert alert-success';
+              resultIcon.className = 'fas fa-check-circle';
+              resultTitle.textContent = 'Carga Completada Exitosamente';
+              resultText.textContent = `Se procesaron exitosamente ${data.eventos_creados} eventos.`;
+            } else if (data.eventos_creados === 0) {
+              // Todo falló
+              resultAlert.className = 'alert alert-danger';
+              resultIcon.className = 'fas fa-exclamation-triangle';
+              resultTitle.textContent = 'Error en la Carga';
+              resultText.textContent = `Ningún evento pudo procesarse. ${data.eventos_fallidos} eventos fallaron.`;
+            } else {
+              // Éxito parcial
+              resultAlert.className = 'alert alert-warning';
+              resultIcon.className = 'fas fa-exclamation-circle';
+              resultTitle.textContent = 'Carga Completada con Errores';
+              resultText.textContent = `Se procesaron ${data.eventos_creados} eventos exitosamente y ${data.eventos_fallidos} eventos fallaron.`;
+            }
+            
+            // Mostrar errores si los hay
+            if (data.errores && data.errores.length > 0) {
+              errorDetails.style.display = 'block';
+              errorList.innerHTML = '';
+              data.errores.forEach(error => {
+                const li = document.createElement('li');
+                li.className = 'text-danger';
+                li.textContent = error;
+                errorList.appendChild(li);
+              });
+            }
+            
+            uploadBtn.disabled = false;
+          }, 1000);
+        })
+        .catch(error => {
+          clearInterval(progressInterval);
+          console.error('Error:', error);
+          alert('Error al procesar el archivo. Inténtalo de nuevo.');
+          document.getElementById('progressContainer').style.display = 'none';
+          uploadBtn.disabled = false;
+        });
+      });
+    </script>
+  </body>
+</html>

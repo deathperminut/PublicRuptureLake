@@ -105,19 +105,6 @@
               Descargar eventos
             </button>
           </form>
-          <form method="POST" class="Filtro-forma" action="DescargarFormato">
-            <button id="formatoBoton" type="submit" class="buscar-report-btn button">
-              <i class="fas fa-download"></i> Descargar formato
-            </button>
-          </form>
-          <form method="POST" class="Filtro-forma" action="CargarMasivo" enctype="multipart/form-data">
-            <div class="mb-3">
-              <input type="file" id="archivoMasivo" name="archivo" accept=".xlsx,.xls" class="form-control" required>
-            </div>
-            <button id="cargarBoton" type="submit" class="buscar-report-btn button">
-              <i class="fas fa-upload"></i> Cargar masivo
-            </button>
-          </form>
         </div>
     </div>
 
@@ -174,12 +161,9 @@
     }
 
     function ocultarDescarga(){
-      // Solo SuperAdmin puede ver botones de descarga, formato y carga masiva
+      // Solo SuperAdmin puede ver el botón de descarga
       if (getCookie("rol") != "SuperAdmin"){
         document.getElementById("descargarBoton").style.display = "none";
-        document.getElementById("formatoBoton").style.display = "none";
-        document.getElementById("cargarBoton").style.display = "none";
-        document.getElementById("archivoMasivo").style.display = "none";
       }
     }
 
