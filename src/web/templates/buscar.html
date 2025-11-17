@@ -60,51 +60,74 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
   </head>
   <body style="background-image: url('{{ url_for('static', filename='images/Fondo.png') }}')";>
-    <div class="buscar-header">
-        <div class="buscar-app-container">
-          <form method="GET" action="Inicio">
-            <button type="submit" class="buscar-button button">
-              <i class="fa fa-right-from-bracket"></i>
-            </button>
-          </form>
+    <!-- Header Mejorado -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); position: fixed; top: 0; width: 100%; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+      <div class="container-fluid px-4">
+        <!-- Logo -->
+        <a class="navbar-brand d-flex align-items-center" href="/Perfil" style="cursor: pointer;">
           <img
-            alt="Logo FuGas"
+            alt="Logo RuptureLakes"
             src="{{ url_for('static', filename='images/logos/RL_logo.png') }}"
-            class="buscar-app-logo"
-            onclick="window.location.href ='Perfil';"
+            height="40"
+            class="me-2"
           />
+          <span class="fw-bold">RuptureLakes</span>
+        </a>
+
+        <!-- Toggle para móvil -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Menú de navegación -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto align-items-center">
+            <!-- Botón Lobby -->
+            <li class="nav-item">
+              <a class="nav-link btn btn-outline-light me-2" href="/Perfil" style="border-radius: 20px; padding: 8px 20px;">
+                <i class="fas fa-home"></i> Inicio
+              </a>
+            </li>
+
+            <!-- Usuario -->
+            <li class="nav-item dropdown me-2">
+              <a class="nav-link dropdown-toggle text-white" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                <i class="fas fa-user-circle fa-lg"></i>
+                <span id="navbarUsername" class="ms-1"></span>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="/Perfil"><i class="fas fa-home"></i> Ir al Inicio</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item text-danger" href="/Inicio"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
+              </ul>
+            </li>
+
+            <!-- Botón Cerrar Sesión (visible siempre) -->
+            <li class="nav-item">
+              <a class="btn btn-danger" href="/Inicio" style="border-radius: 20px; padding: 8px 20px;">
+                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+              </a>
+            </li>
+          </ul>
         </div>
-    </div>
+      </div>
+    </nav>
+
+    <!-- Espaciador para el navbar fixed -->
+    <div style="height: 70px;"></div>
 
     <div class="buscar-container">
         <div class="buscar-container3">
-          <h1 id="banner" name="banner" class="buscar-text">Número de orden:</h1>
+          <h1 id="banner" name="banner" class="buscar-text">Búsqueda de Eventos</h1>
         </div>
         <div class="buscar-container4">
-          <form method="POST" action="Buscar">
-            <input type="text" id="orden" name="orden" required="" class="buscar-txt-orden input" />
-            <button type="submit" class="buscar-orden-btn button">
+          <form method="POST" action="Buscar" style="display: flex; gap: 10px; align-items: center; justify-content: center;">
+            <input type="text" id="orden" name="orden" required="" placeholder="Ingresa el número de orden..." class="buscar-txt-orden input" />
+            <button type="submit" class="buscar-orden-btn button" title="Buscar evento">
               <i class="fa fa-magnifying-glass"></i>
             </button>
           </form>
           <label id="noResults" class="buscar-label">Sin resultados</label>
-        </div>
-        <div class="buscar-container4">
-          <form method="POST" class="Filtro-forma" action="Descargar">
-            <!-- <div>
-              <label class="Filtro-label1">Filtrar por fecha:</label>
-              <input type="checkbox" id="actFiltros" name="actFiltros" class="filtro-check" onclick="mostrarFiltros()"></input>
-            </div>
-            <div id="filtros" class="Filtro-container">
-              <label for="fecha_ini" class="Filtro-label1">Fecha inicial:</label>
-              <input type="date" class="evento-txt-orden" id="fecha_ini" name="fecha_ini" onfocus="this.showPicker()" oninput="fechaMinima()"></input>
-              <label for="fecha_final" class="Filtro-label1">Fecha final:</label>
-              <input type="date" class="evento-txt-orden" id="fecha_final" name="fecha_final" onfocus="this.showPicker()" oninput="fechaMaxima()"></input>
-            </div> -->
-            <button id="descargarBoton" type="submit" class="buscar-report-btn button">
-              Descargar eventos
-            </button>
-          </form>
         </div>
     </div>
 
@@ -160,12 +183,6 @@
       }
     }
 
-    function ocultarDescarga(){
-      // Solo SuperAdmin puede ver el botón de descarga
-      if (getCookie("rol") != "SuperAdmin"){
-        document.getElementById("descargarBoton").style.display = "none";
-      }
-    }
 
     function mostrarFiltros(){
       if (document.getElementById("actFiltros").checked){
@@ -206,8 +223,19 @@
 
 
     ocultarLabel();
-    ocultarDescarga();
     fechas_hoy();
     mostrarFiltros();
+
+    // Mostrar nombre de usuario en navbar
+    function mostrarUsuarioNavbar() {
+      const nombre = getCookie('nombre1');
+      const apellido = getCookie('nombre2');
+      if (nombre) {
+        const nombreCompleto = apellido ? `${nombre} ${apellido}` : nombre;
+        document.getElementById('navbarUsername').textContent = nombreCompleto;
+      }
+    }
+
+    mostrarUsuarioNavbar();
   </script>
 </html>

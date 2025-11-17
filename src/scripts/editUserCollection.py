@@ -19,7 +19,7 @@ def editCollectionUser():
                     "email": {"bsonType": "string"},
                     "identification": {"bsonType": "string"},
                     "rol": {
-                      "enum":['worker','admin']
+                      "enum":['worker','SuperAdmin']
                     },
                     "state":{
                         "enum":[True,False]

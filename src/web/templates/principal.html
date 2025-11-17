@@ -71,21 +71,49 @@
     verificarSesion();
   </script>
   <body style="background-image: url('{{ url_for('static', filename='images/Fondo.png') }}')";>
-    <div class="principal-header">
-        <div class="principal-app-container">
-          <form method="GET" action="Inicio">
-            <button type="submit" class="principal-button button">
-              <i class="fa fa-right-from-bracket"></i>
-            </button>
-          </form>
+    <!-- Header Mejorado -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+      <div class="container-fluid px-4">
+        <!-- Logo -->
+        <a class="navbar-brand d-flex align-items-center" href="/Perfil" style="cursor: pointer;">
           <img
-            alt="Logo FuGas"
+            alt="Logo RuptureLakes"
             src="{{ url_for('static', filename='images/logos/RL_logo.png') }}"
-            class="principal-app-logo"
-            onclick="window.location.href ='Perfil';"
+            height="40"
+            class="me-2"
           />
+          <span class="fw-bold">RuptureLakes</span>
+        </a>
+
+        <!-- Toggle para móvil -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Menú de navegación -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto align-items-center">
+            <!-- Usuario -->
+            <li class="nav-item dropdown me-2">
+              <a class="nav-link dropdown-toggle text-white" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                <i class="fas fa-user-circle fa-lg"></i>
+                <span id="navbarUsername" class="ms-1"></span>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item text-danger" href="/Inicio"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
+              </ul>
+            </li>
+
+            <!-- Botón Cerrar Sesión (visible siempre) -->
+            <li class="nav-item">
+              <a class="btn btn-danger" href="/Inicio" style="border-radius: 20px; padding: 8px 20px;">
+                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+              </a>
+            </li>
+          </ul>
         </div>
-    </div>
+      </div>
+    </nav>
 
     <div class="principal-container">
         <div class="principal-container3">
@@ -94,15 +122,20 @@
         <div class="principal-container4">
           <form method="POST" class="principal-form" action="NuevoEvento">
             <button type="submit" class="principal-evento-btn button">
-              Nuevo evento
+              <i class="fas fa-plus-circle"></i> Nuevo evento
             </button>
           </form>
           <form method="POST" class="principal-form" action="CargarBuscar">
             <button type="submit" class="principal-report-btn button">
-              Visualizar evento
+              <i class="fas fa-search"></i> Buscar evento
             </button>
           </form>
-          <form method="POST" id="crearAdmin" class="principal-form" action="RegistrarseAdmin">
+          <form method="GET" class="principal-form" action="VisualizarEventos">
+            <button type="submit" class="principal-report-btn button">
+              <i class="fas fa-table"></i> Tabla de eventos
+            </button>
+          </form>
+          <form method="POST" id="crearAdmin" class="principal-form" action="RegistrarseAdmin" style="display: none;">
             <button type="submit" class="principal-report-btn button">
               Crear admin
             </button>
@@ -157,16 +190,14 @@
     }
 
     function ocultarBoton() {
-      /// PREGUNTAR EL TEMA DEL ADMIN
-      if (getCookie("tipo_user") != "1"){
-        document.getElementById("crearAdmin").style.display = "none";
-      }
-      
+      // Ocultar "Crear admin" para todos los usuarios (funcionalidad deprecated)
+      document.getElementById("crearAdmin").style.display = "none";
+
       // Mostrar botón de administración solo a SuperAdmin
       if (getCookie("rol") == "SuperAdmin") {
         document.getElementById("adminPanel").style.display = "block";
       }
-      
+
       // Mostrar carga masiva a SuperAdmin y worker
       if (getCookie("rol") == "SuperAdmin" || getCookie("rol") == "worker") {
         document.getElementById("cargaMasivaPanel").style.display = "block";
@@ -175,5 +206,17 @@
 
     ponerNombre();
     ocultarBoton();
+
+    // Mostrar nombre de usuario en navbar
+    function mostrarUsuarioNavbar() {
+      const nombre = getCookie('nombre1');
+      const apellido = getCookie('nombre2');
+      if (nombre) {
+        const nombreCompleto = apellido ? `${nombre} ${apellido}` : nombre;
+        document.getElementById('navbarUsername').textContent = nombreCompleto;
+      }
+    }
+
+    mostrarUsuarioNavbar();
   </script>
 </html>

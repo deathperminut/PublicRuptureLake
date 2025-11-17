@@ -45,25 +45,65 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
     />
     <script src="https://kit.fontawesome.com/697919b5b5.js" crossorigin="anonymous"></script>
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   </head>
   <body style="background-image: url('{{ url_for('static', filename='images/Fondo.png') }}')";>
     <link rel="stylesheet" href="./style.css" />
     <link href="./resultados.css" rel="stylesheet" />
-    <div class="resultados-header">
-      <div class="resultados-app-container">
-        <form method="GET" action="Inicio">
-          <button type="submit" class="resultados-button button">
-            <i class="fa fa-right-from-bracket"></i>
-          </button>
-        </form>
-        <img
-          alt="Logo FuGas"
-          src="{{ url_for('static', filename='images/logos/RL_logo.png') }}"
-          class="resultados-app-logo"
-          onclick="window.location.href ='Perfil';"
-        />
+
+    <!-- Header Mejorado -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+      <div class="container-fluid px-4">
+        <!-- Logo -->
+        <a class="navbar-brand d-flex align-items-center" href="/Perfil" style="cursor: pointer;">
+          <img
+            alt="Logo RuptureLakes"
+            src="{{ url_for('static', filename='images/logos/RL_logo.png') }}"
+            height="40"
+            class="me-2"
+          />
+          <span class="fw-bold">RuptureLakes</span>
+        </a>
+
+        <!-- Toggle para móvil -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Menú de navegación -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto align-items-center">
+            <!-- Botón Lobby -->
+            <li class="nav-item">
+              <a class="nav-link btn btn-outline-light me-2" href="/Perfil" style="border-radius: 20px; padding: 8px 20px;">
+                <i class="fas fa-home"></i> Inicio
+              </a>
+            </li>
+
+            <!-- Usuario -->
+            <li class="nav-item dropdown me-2">
+              <a class="nav-link dropdown-toggle text-white" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                <i class="fas fa-user-circle fa-lg"></i>
+                <span id="navbarUsername" class="ms-1"></span>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="/Perfil"><i class="fas fa-home"></i> Ir al Inicio</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item text-danger" href="/Inicio"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
+              </ul>
+            </li>
+
+            <!-- Botón Cerrar Sesión (visible siempre) -->
+            <li class="nav-item">
+              <a class="btn btn-danger" href="/Inicio" style="border-radius: 20px; padding: 8px 20px;">
+                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+              </a>
+            </li>
+          </ul>
+        </div>
       </div>
-    </div>
+    </nav>
     <div class="resultados-container2">
       <div class="resultados-datos">  
         <div class="resultados-numerodeorden"> 
@@ -193,6 +233,24 @@
     document.getElementById("Tlargo").innerHTML = "{{ Tlargo }} {{ TlargoUni }}"
     document.getElementById("subte").innerHTML = "{{ Subte }}"
     document.getElementById("vol_muerto").innerHTML = "{{ vol_muerto }} m<sup>3"
-document.getElementById("Diametro_tube").innerHTML = "{{ Tdiametro }} {{ Unidades }} de {{ material }}"
+    document.getElementById("Diametro_tube").innerHTML = "{{ Tdiametro }} {{ Unidades }} de {{ material }}"
+
+    // Mostrar nombre de usuario en navbar
+    function mostrarUsuarioNavbar() {
+      const nombre = getCookie('nombre1');
+      const apellido = getCookie('nombre2');
+      if (nombre) {
+        const nombreCompleto = apellido ? `${nombre} ${apellido}` : nombre;
+        const usernameElement = document.getElementById('navbarUsername');
+        if (usernameElement) {
+          usernameElement.textContent = nombreCompleto;
+        }
+      }
+    }
+
+    mostrarUsuarioNavbar();
   </script>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </html>

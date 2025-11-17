@@ -81,7 +81,17 @@ def deleteEvent(body):
 
     client =  getInstance()
     db = client["rupture"]
-    filter_ = {"_id":ObjectId(body['_id'])}
+
+    # Permitir eliminar por _id o por orden
+    if '_id' in body:
+        filter_ = {"_id":ObjectId(body['_id'])}
+    elif 'orden' in body:
+        filter_ = {"orden": body['orden']}
+    else:
+        # Si no tiene ni _id ni orden, retornar error
+        from pymongo.results import DeleteResult
+        return DeleteResult(acknowledged=True, raw_result={'n': 0})
+
     response = db.events.delete_one(filter_)
     return response
 

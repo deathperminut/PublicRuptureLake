@@ -154,6 +154,64 @@ def DeleteEvent():
         status_code = 400
     return jsonify(response), status_code
 
+@app.route('/rupture/deleteEventRange', methods=['POST'])
+def DeleteEventRange():
+    """Eliminar eventos en un rango de números de orden"""
+    data = request.json
+    orden_desde = data.get('orden_desde')
+    orden_hasta = data.get('orden_hasta')
+
+    if not orden_desde or not orden_hasta:
+        return jsonify({"success": False, "message": "Debe especificar orden_desde y orden_hasta"}), 400
+
+    try:
+        # Obtener todos los eventos
+        from functions.conect import getInstance
+        client = getInstance()
+        db = client["rupture"]
+
+        # Convertir rangos a números para comparación numérica
+        try:
+            orden_desde_num = float(orden_desde)
+            orden_hasta_num = float(orden_hasta)
+        except (ValueError, TypeError):
+            return jsonify({"success": False, "message": "Los valores de orden deben ser números"}), 400
+
+        # Obtener todos los eventos y filtrar por rango
+        all_events = list(db.events.find())
+
+        # Filtrar eventos que estén en el rango
+        eventos_a_eliminar = []
+        for event in all_events:
+            orden = event.get('orden', '')
+            try:
+                # Comparación numérica
+                orden_num = float(orden)
+                if orden_desde_num <= orden_num <= orden_hasta_num:
+                    eventos_a_eliminar.append(orden)
+            except (ValueError, TypeError):
+                # Si orden no es numérico, intentar comparación de strings como fallback
+                if orden_desde <= str(orden) <= orden_hasta:
+                    eventos_a_eliminar.append(orden)
+
+        # Eliminar los eventos del rango
+        if len(eventos_a_eliminar) > 0:
+            result = db.events.delete_many({"orden": {"$in": eventos_a_eliminar}})
+            return jsonify({
+                "success": True,
+                "deleted_count": result.deleted_count,
+                "message": f"Se eliminaron {result.deleted_count} eventos"
+            }), 200
+        else:
+            return jsonify({
+                "success": False,
+                "deleted_count": 0,
+                "message": "No se encontraron eventos en el rango especificado"
+            }), 200
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
 @app.route('/rupture/updateEvent',methods= ['POST'])
 def UpdateEvent():
     data = request.json

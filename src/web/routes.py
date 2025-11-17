@@ -11,6 +11,7 @@ from flask import Flask, request, send_file, render_template, make_response, red
 
 from functions.users import loginUserV2, createUser, getUsers, updateUserState, updateUserPassword, getUserById
 from functions.events import createEvent, updateEvent, getSpecificEvent, getEvents
+from functions.conect import getInstance
 from functions.modelos import *
 import pandas as pd
 import numpy as np
@@ -37,7 +38,7 @@ def init_web_routes(app):
             resp.set_cookie('nombre1', '')
             resp.set_cookie('nombre2', '')
             resp.set_cookie('empresa', '')
-            resp.set_cookie('tipo_user', '')
+            resp.set_cookie('rol', '')
         return resp
 
     @app.route('/Ingresar', methods=['POST'])
@@ -59,8 +60,7 @@ def init_web_routes(app):
             resp.set_cookie('nombre1', result['first_name'])
             resp.set_cookie('nombre2', result['last_name'])
             resp.set_cookie('empresa', 'Efigas S.A')
-            resp.set_cookie('tipo_user', 'worker')  # Mantener para compatibilidad
-            resp.set_cookie('rol', result.get('rol', 'worker'))  # Nuevo: rol del usuario
+            resp.set_cookie('rol', result.get('rol', 'worker'))  # Rol del usuario
             return resp
         else:
             # Error en login - redirigir a inicio sin mensaje
@@ -122,6 +122,42 @@ def init_web_routes(app):
         resp = make_response(render_template('buscar.html'))
         return resp
 
+    @app.route('/VisualizarEventos', methods=['GET'])
+    def visualizar_eventos():
+        """Página con tabla de todos los eventos - SuperAdmin y worker pueden ver"""
+        # Verificar que el usuario esté autenticado
+        user_rol = request.cookies.get('rol')
+        if not user_rol or user_rol not in ['SuperAdmin', 'worker']:
+            return redirect('/Inicio')
+
+        # Obtener todos los eventos
+        events_cursor = getEvents()
+        events_list = []
+
+        for event in events_cursor:
+            event['_id'] = str(event['_id'])  # Convertir ObjectId a string
+            # Formatear datos para la tabla
+            event_display = {
+                '_id': event['_id'],
+                'orden': event.get('orden', 'N/A'),
+                'ubicacion': event.get('ubicacion', 'N/A'),
+                'inicio': event.get('inicio', 'N/A'),
+                'duracion_hrs': round(event.get('duracion', 0) / 3600, 2) if event.get('duracion') else 0,
+                'volumen': round(event.get('volumen', 0), 2),
+                'flujo': round(event.get('flujo', 0), 2),
+                'presion': round(event.get('presion', 0), 2),
+                'diame_tube': event.get('diame_tube', 'N/A'),
+                'forma': event.get('forma', 'N/A'),
+                'direccion': event.get('direccion', 'N/A'),
+                'subte': event.get('subte', 'N/A'),
+                'aprobado': event.get('aprobado', 'no'),
+                'hora_reg': event.get('hora_reg', 'N/A')
+            }
+            events_list.append(event_display)
+
+        resp = make_response(render_template('visualizar_eventos.html', events=events_list, user_rol=user_rol))
+        return resp
+
     @app.route('/Buscar', methods=['POST'])
     def buscar():
         orden = request.form.get('orden')
@@ -168,7 +204,7 @@ def init_web_routes(app):
             template_data = {
                 'orden': fila['orden'],
                 'dia_reg': fecha_reg.day,
-                'mes_reg': fecha_reg.month, 
+                'mes_reg': fecha_reg.month,
                 'año_reg': fecha_reg.year,
                 'dia_inicio': fecha_inicio.day,
                 'mes_inicio': fecha_inicio.month,
@@ -189,7 +225,10 @@ def init_web_routes(app):
                 'Tlargo': fila['dist_tube'],
                 'TlargoUni': fila['dist_tube_uni'],
                 'Subte': "Subterráneo" if fila['subte'] == "sub" else "Aéreo",
-                'aprobado': fila['aprobado']
+                'aprobado': fila['aprobado'],
+                'diame_tube': fila['diame_tube'],
+                'material': fila['Material'],
+                'Unidades': fila['Unidades']
             }
             
             resp = make_response(render_template('reporte.html', **template_data))
@@ -736,10 +775,10 @@ def init_web_routes(app):
                 'Forma': fila['forma'],
                 'DiameFuga': fila.get('medida_rupt', ''),
                 'DiameFugaUni': fila.get('medida_uni', 'mm'),
-                'LongiFuga': fila.get('medida_rupt', '') if fila['forma'] == 'recta' else '',
-                'LongiFugaUni': fila.get('medida_uni', 'mm') if fila['forma'] == 'recta' else 'mm',
-                'diameEqui': 'checked' if fila.get('diame_equi', 'no') == 'sí' else '',
-                'escape': '1'  # Valor por defecto
+                'LongiFuga': fila.get('medida_rupt', '') if fila['forma'] == 'recta' or fila['forma'] == 'Recta' else '',
+                'LongiFugaUni': fila.get('medida_uni', 'mm') if fila['forma'] == 'recta' or fila['forma'] == 'Recta' else 'mm',
+                'diameEqui': fila.get('diame_equi', 'no'),
+                'escape': fila.get('diame_equi', 'min')
             }
             
             resp = make_response(render_template('editar.html', **form_data))
@@ -752,6 +791,24 @@ def init_web_routes(app):
     @app.route('/Aprobar', methods=['POST'])
     def aprobar():
         # Esta ruta aprueba un evento
+        # Verificar que el usuario sea SuperAdmin
+        user_rol = request.cookies.get('rol')
+        if user_rol != 'SuperAdmin':
+            return redirect('/Perfil')
+
+        # Obtener el número de orden del cookie
+        orden = request.cookies.get('orden')
+        if not orden:
+            return redirect('/Perfil')
+
+        # Actualizar el campo aprobado en la base de datos
+        client = getInstance()
+        db = client["rupture"]
+        filter_ = {"orden": orden}
+        update = {"$set": {"aprobado": "sí"}}
+        db.events.update_one(filter_, update)
+
+        # Redirigir de vuelta al reporte
         resp = make_response(redirect('/Reporte', code=307))
         return resp
 
@@ -956,63 +1013,137 @@ def init_web_routes(app):
 
     @app.route('/DescargarFormatoSimple', methods=['POST'])
     def descargar_formato_simple():
-        """Descargar formato simplificado basado en formulario de crear evento"""
+        """Descargar formato mejorado y más intuitivo para carga masiva"""
         # Verificar que el usuario sea SuperAdmin o worker
         user_rol = request.cookies.get('rol')
         if user_rol not in ['SuperAdmin', 'worker']:
             return redirect('/CargaMasiva')
-        
-        # Campos que el usuario llena en el formulario (sin cálculos)
+
+        # Campos simplificados y en español
         columnas_formulario = [
-            'orden',
-            'ubicacion', 
-            'presion',
-            'presionUni',
-            'subte',
-            'diameEqui',
-            'escape',
-            'Flujo',
-            'Forma', 
-            'DiameFuga',
-            'DiameFugaUni',
-            'LongiFuga',
-            'LongiFugaUni',
-            'DistTube',
-            'DistTubeUni', 
-            'DistTube2',
-            'DistTubeUni2',
-            'DiameTube',
-            'tiempoInicio',
-            'tiempoFin'
+            'Numero_Orden',
+            'Latitud',
+            'Longitud',
+            'Presion_Tuberia',
+            'Unidad_Presion',
+            'Diametro_Tuberia_Pulgadas',
+            'Ubicacion_Tuberia',
+            'Direccion_Flujo',
+            'Tipo_Ruptura',
+            'Medida_Ruptura',
+            'Unidad_Medida_Ruptura',
+            'Usar_Diametro_Equivalente',
+            'Tipo_Escape',
+            'Distancia_Valvula_1_m',
+            'Distancia_Valvula_2_m',
+            'Año_Inicio',
+            'Mes_Inicio',
+            'Dia_Inicio',
+            'Hora_Inicio',
+            'Minuto_Inicio',
+            'Año_Fin',
+            'Mes_Fin',
+            'Dia_Fin',
+            'Hora_Fin',
+            'Minuto_Fin'
         ]
         
-        # Crear DataFrame con ejemplo
+        # Crear DataFrame con ejemplos claros
         df_formato = pd.DataFrame(columns=columnas_formulario)
-        
-        # Agregar fila de ejemplo con datos realistas del formulario  
-        ejemplo = {
-            'orden': 'CAMBIAR_POR_TU_ORDEN_001',
-            'ubicacion': '4.6097,-74.0817',
-            'presion': 60.0,
-            'presionUni': 'psig',
-            'subte': 'sub',
-            'diameEqui': 'off',
-            'escape': 1,
-            'Flujo': 'uni', 
-            'Forma': 'circ',
-            'DiameFuga': 25.4,
-            'DiameFugaUni': 'mm',
-            'LongiFuga': '',
-            'LongiFugaUni': 'mm',
-            'DistTube': 100.0,
-            'DistTubeUni': 'm',
-            'DistTube2': '',
-            'DistTubeUni2': 'm',
-            'DiameTube': 4.0,
-            'tiempoInicio': '2024-01-15T10:30',
-            'tiempoFin': '2024-01-15T11:30'
+
+        # EJEMPLO 1: Ruptura circular sin diámetros equivalentes
+        ejemplo1 = {
+            'Numero_Orden': 1,
+            'Latitud': 4.6097,
+            'Longitud': -74.0817,
+            'Presion_Tuberia': 60.0,
+            'Unidad_Presion': 'psig',
+            'Diametro_Tuberia_Pulgadas': 4.0,
+            'Ubicacion_Tuberia': 'Subterránea',
+            'Direccion_Flujo': 'Unidireccional',
+            'Tipo_Ruptura': 'Circular',
+            'Medida_Ruptura': 25.4,
+            'Unidad_Medida_Ruptura': 'mm',
+            'Usar_Diametro_Equivalente': 'NO',
+            'Tipo_Escape': '',
+            'Distancia_Valvula_1_m': 100.0,
+            'Distancia_Valvula_2_m': '',
+            'Año_Inicio': 2024,
+            'Mes_Inicio': 1,
+            'Dia_Inicio': 15,
+            'Hora_Inicio': 10,
+            'Minuto_Inicio': 30,
+            'Año_Fin': 2024,
+            'Mes_Fin': 1,
+            'Dia_Fin': 15,
+            'Hora_Fin': 11,
+            'Minuto_Fin': 30
         }
-        df_formato = pd.concat([df_formato, pd.DataFrame([ejemplo])], ignore_index=True)
+
+        # EJEMPLO 2: Ruptura recta
+        ejemplo2 = {
+            'Numero_Orden': 2,
+            'Latitud': 4.6150,
+            'Longitud': -74.0850,
+            'Presion_Tuberia': 45.0,
+            'Unidad_Presion': 'psig',
+            'Diametro_Tuberia_Pulgadas': 2.0,
+            'Ubicacion_Tuberia': 'Superficial',
+            'Direccion_Flujo': 'Unidireccional',
+            'Tipo_Ruptura': 'Recta',
+            'Medida_Ruptura': 50.0,
+            'Unidad_Medida_Ruptura': 'mm',
+            'Usar_Diametro_Equivalente': 'NO',
+            'Tipo_Escape': '',
+            'Distancia_Valvula_1_m': 150.0,
+            'Distancia_Valvula_2_m': '',
+            'Año_Inicio': 2024,
+            'Mes_Inicio': 2,
+            'Dia_Inicio': 20,
+            'Hora_Inicio': 14,
+            'Minuto_Inicio': 0,
+            'Año_Fin': 2024,
+            'Mes_Fin': 2,
+            'Dia_Fin': 20,
+            'Hora_Fin': 16,
+            'Minuto_Fin': 30
+        }
+
+        # EJEMPLO 3: Flujo bidireccional con diámetros equivalentes
+        ejemplo3 = {
+            'Numero_Orden': 3,
+            'Latitud': 4.6200,
+            'Longitud': -74.0900,
+            'Presion_Tuberia': 75.0,
+            'Unidad_Presion': 'psig',
+            'Diametro_Tuberia_Pulgadas': 6.0,
+            'Ubicacion_Tuberia': 'Subterránea',
+            'Direccion_Flujo': 'Bidireccional',
+            'Tipo_Ruptura': 'Circular',
+            'Medida_Ruptura': '',
+            'Unidad_Medida_Ruptura': 'mm',
+            'Usar_Diametro_Equivalente': 'SI',
+            'Tipo_Escape': 'Mínimo',
+            'Distancia_Valvula_1_m': 200.0,
+            'Distancia_Valvula_2_m': 180.0,
+            'Año_Inicio': 2024,
+            'Mes_Inicio': 3,
+            'Dia_Inicio': 10,
+            'Hora_Inicio': 8,
+            'Minuto_Inicio': 0,
+            'Año_Fin': 2024,
+            'Mes_Fin': 3,
+            'Dia_Fin': 10,
+            'Hora_Fin': 12,
+            'Minuto_Fin': 0
+        }
+
+        df_formato = pd.concat([
+            df_formato,
+            pd.DataFrame([ejemplo1]),
+            pd.DataFrame([ejemplo2]),
+            pd.DataFrame([ejemplo3])
+        ], ignore_index=True)
         
         # Crear archivo Excel con múltiples hojas
         buffer = io.BytesIO()
@@ -1036,124 +1167,299 @@ def init_web_routes(app):
         )
 
     def crear_excel_completo(writer, df_formato):
-        """Función auxiliar para crear el Excel con múltiples hojas"""
+        """Función auxiliar para crear el Excel con múltiples hojas mejoradas"""
         # Hoja principal con datos
         df_formato.to_excel(writer, sheet_name='Eventos', index=False)
-        
-        # Crear hoja de opciones válidas
+
+        # Hoja de opciones válidas más clara
         opciones_data = {
-            'presionUni_opciones': ['psig', 'bar', 'kPa'],
-            'subte_opciones': ['sub', 'superficial'],
-            'Flujo_opciones': ['uni', 'bi'],
-            'Forma_opciones': ['circ', 'rect', 'tria', 'recta', 'total'],
-            'diameEqui_opciones': ['on', 'off'],
-            'DiameFugaUni_opciones': ['mm', 'in'],
-            'LongiFugaUni_opciones': ['mm', 'in'],
-            'DistTubeUni_opciones': ['m', 'ft'],
-            'DistTubeUni2_opciones': ['m', 'ft']
+            'Unidad_Presion': ['psig', 'bar', 'kPa'],
+            'Ubicacion_Tuberia': ['Subterránea', 'Superficial'],
+            'Direccion_Flujo': ['Unidireccional', 'Bidireccional'],
+            'Tipo_Ruptura': ['Circular', 'Recta', 'Rectangular', 'Triangular', 'Total'],
+            'Unidad_Medida_Ruptura': ['mm', 'in'],
+            'Usar_Diametro_Equivalente': ['SI', 'NO'],
+            'Tipo_Escape': ['Mínimo', 'Parcial', 'Total', '']
         }
-        
-        # Crear hoja de opciones válidas
+
         opciones_df = pd.DataFrame(dict([(k, pd.Series(v)) for k, v in opciones_data.items()]))
         opciones_df.to_excel(writer, sheet_name='Opciones_Validas', index=False)
         
         # Hoja de diámetros de tubería comunes
         diametros_tuberia = pd.DataFrame({
-            'DiameTube_comunes': [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0, 10.0, 12.0, 16.0, 20.0, 24.0],
+            'Diametro_Pulgadas': [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0, 10.0, 12.0, 16.0, 20.0, 24.0],
             'Descripcion': ['1/2"', '3/4"', '1"', '1 1/4"', '1 1/2"', '2"', '3"', '4"', '6"', '8"', '10"', '12"', '16"', '20"', '24"']
         })
-        diametros_tuberia.to_excel(writer, sheet_name='Diametros_Tuberia', index=False)
-        
-        # Crear hoja de instrucciones mejoradas
+        diametros_tuberia.to_excel(writer, sheet_name='Diametros_Comunes', index=False)
+
+        # Crear hoja de instrucciones mejoradas y más claras
         instrucciones = pd.DataFrame([
-            ['INSTRUCCIONES PARA CARGA MASIVA DE EVENTOS'],
+            ['═══════════════════════════════════════════════════════════════════'],
+            ['         INSTRUCCIONES PARA CARGA MASIVA DE EVENTOS DE RUPTURA'],
+            ['═══════════════════════════════════════════════════════════════════'],
             [''],
-            ['PASO A PASO:'],
-            ['1. IMPORTANTE: Cambia "CAMBIAR_POR_TU_ORDEN_001" por un código único'],
-            ['2. Llena tus datos usando las opciones válidas de las otras hojas'],
-            ['3. Guarda el archivo y súbelo en la página web'],
+            ['┌─ PASO 1: ENTENDER EL FORMATO ─────────────────────────────────┐'],
+            ['│ • Este archivo tiene 3 EJEMPLOS ya completados                 │'],
+            ['│ • Ejemplo 1: Ruptura circular básica (Numero_Orden = 1)       │'],
+            ['│ • Ejemplo 2: Ruptura recta (Numero_Orden = 2)                 │'],
+            ['│ • Ejemplo 3: Flujo bidireccional (Numero_Orden = 3)           │'],
+            ['└────────────────────────────────────────────────────────────────┘'],
             [''],
-            ['CAMPOS OBLIGATORIOS:'],
-            ['- orden: Número único (ej: EV-2024-001, RUPTURA-001, etc)'],
-            ['- ubicacion: Lat,Lng (ej: 4.6097,-74.0817) - usar Google Maps'],
-            ['- presion: Número (ej: 60, 45.5, 120)'],
-            ['- presionUni: Ver hoja "Opciones_Validas" (psig, bar, kPa)'],
-            ['- subte: Ver hoja "Opciones_Validas" (sub o superficial)'],
-            ['- Flujo: Ver hoja "Opciones_Validas" (uni o bi)'],
-            ['- Forma: Ver hoja "Opciones_Validas" (circ, rect, tria, recta, total)'],
-            ['- DiameTube: Ver hoja "Diametros_Tuberia" para valores comunes'],
-            ['- tiempoInicio: YYYY-MM-DDTHH:MM (ej: 2024-01-15T10:30)'],
-            ['- tiempoFin: YYYY-MM-DDTHH:MM (ej: 2024-01-15T11:30)'],
+            ['┌─ PASO 2: LLENAR TUS DATOS ────────────────────────────────────┐'],
+            ['│ OPCIÓN A: Elimina las 3 filas de ejemplo y agrega tus datos   │'],
+            ['│ OPCIÓN B: Modifica los ejemplos cambiando:                     │'],
+            ['│   - Numero_Orden de 1, 2, 3 a tus números (ej: 100, 101, 102) │'],
+            ['│   - Los demás datos según tu evento real                       │'],
+            ['│ • Usa las hojas "Opciones_Validas" y "Diametros_Comunes"      │'],
+            ['└────────────────────────────────────────────────────────────────┘'],
             [''],
-            ['CAMPOS SEGÚN TIPO DE RUPTURA:'],
-            ['- Si Forma = circ: llenar DiameFuga y DiameFugaUni'],
-            ['- Si Forma = recta: llenar LongiFuga y LongiFugaUni'],
-            ['- Si Forma = rect/tria: llenar DiameFuga como el lado/radio'],
-            ['- Si Forma = total: dejar DiameFuga vacío'],
+            ['┌─ PASO 3: SUBIR EL ARCHIVO ────────────────────────────────────┐'],
+            ['│ • Guarda los cambios en Excel                                  │'],
+            ['│ • Ve a la página de Carga Masiva                               │'],
+            ['│ • Sube el archivo y espera los resultados                      │'],
+            ['└────────────────────────────────────────────────────────────────┘'],
             [''],
-            ['CAMPOS OPCIONALES:'],
-            ['- diameEqui: "on" para usar diámetro equivalente, "off" para no usar'],
-            ['- escape: Número (1-5) para cálculo de diámetro equivalente'],
-            ['- DistTube: Distancia a primera válvula (número)'],
-            ['- DistTube2: Distancia a segunda válvula (solo si Flujo=bi)'],
-            ['- DistTubeUni/DistTubeUni2: Ver opciones (m o ft)'],
+            ['════════════════════ CAMPOS OBLIGATORIOS ═════════════════════════'],
             [''],
-            ['EJEMPLOS DE DATOS VÁLIDOS:'],
-            ['presionUni: psig, bar, kPa'],
-            ['subte: sub, superficial'],
-            ['Flujo: uni, bi'],
-            ['Forma: circ, rect, tria, recta, total'],
-            ['diameEqui: on, off'],
+            ['📍 Numero_Orden: Número único del evento'],
+            ['   ✓ Usar números enteros: 4, 5, 10, 100, 1001, etc.'],
+            ['   ✗ No usar: 1, 2, 3 (son ejemplos y se omitirán automáticamente)'],
+            ['   ⚠  Comienza desde el número 4 en adelante para tus eventos reales'],
             [''],
-            ['NOTAS IMPORTANTES:'],
-            ['- Usar punto (.) como separador decimal, no coma'],
-            ['- Coordenadas con punto como decimal: 4.6097,-74.0817'],
-            ['- Fechas en formato ISO: 2024-01-15T10:30'],
-            ['- Eliminar SIEMPRE la fila de ejemplo antes de subir'],
-            ['- Los cálculos complejos se harán automáticamente']
+            ['📍 Latitud y Longitud: Coordenadas GPS del evento'],
+            ['   ✓ Usar Google Maps para obtenerlas'],
+            ['   ✓ Latitud: entre -90 y 90 (ej: 4.6097)'],
+            ['   ✓ Longitud: entre -180 y 180 (ej: -74.0817)'],
+            [''],
+            ['📍 Presion_Tuberia: Presión de operación'],
+            ['   ✓ Número positivo (ej: 60, 45.5, 120)'],
+            ['   ✓ Unidad_Presion: psig, bar, o kPa'],
+            [''],
+            ['📍 Diametro_Tuberia_Pulgadas: Tamaño nominal de la tubería'],
+            ['   ✓ Ver hoja "Diametros_Comunes" para valores estándar'],
+            ['   ✓ Ejemplos: 2, 4, 6, 8 (en pulgadas)'],
+            [''],
+            ['📍 Ubicacion_Tuberia: Dónde está instalada'],
+            ['   ✓ Subterránea o Superficial'],
+            [''],
+            ['📍 Direccion_Flujo: Cómo fluye el gas'],
+            ['   ✓ Unidireccional: una sola dirección de flujo'],
+            ['   ✓ Bidireccional: flujo desde ambos lados'],
+            ['   ⚠ Si es Bidireccional, llenar Distancia_Valvula_2_m'],
+            [''],
+            ['📍 Tipo_Ruptura: Forma de la rotura'],
+            ['   ✓ Circular: agujero redondo'],
+            ['   ✓ Recta: grieta lineal'],
+            ['   ✓ Rectangular: rotura rectangular'],
+            ['   ✓ Triangular: rotura triangular'],
+            ['   ✓ Total: rotura completa de tubería'],
+            [''],
+            ['📍 Medida_Ruptura: Tamaño de la rotura'],
+            ['   Para Circular/Rectangular/Triangular: diámetro o lado'],
+            ['   Para Recta: longitud de la grieta'],
+            ['   Para Total: dejar VACÍO'],
+            ['   ✓ Unidad_Medida_Ruptura: mm o in'],
+            [''],
+            ['📍 Fechas y Horas: Cuándo inició y terminó la fuga'],
+            ['   ✓ Año_Inicio, Mes_Inicio, Dia_Inicio (ej: 2024, 1, 15)'],
+            ['   ✓ Hora_Inicio, Minuto_Inicio (formato 24h: ej: 14, 30)'],
+            ['   ✓ Año_Fin, Mes_Fin, Dia_Fin'],
+            ['   ✓ Hora_Fin, Minuto_Fin'],
+            ['   ⚠ La fecha de fin debe ser posterior a la de inicio'],
+            [''],
+            ['══════════════════ CAMPOS OPCIONALES ══════════════════════════════'],
+            [''],
+            ['🔧 Usar_Diametro_Equivalente: SI o NO'],
+            ['   • SI: el sistema calcula el tamaño de rotura automáticamente'],
+            ['   • NO: debes especificar Medida_Ruptura manualmente'],
+            ['   Si eliges SI, especifica Tipo_Escape:'],
+            ['     - Mínimo: escape pequeño'],
+            ['     - Parcial: escape moderado'],
+            ['     - Total: escape máximo'],
+            [''],
+            ['🔧 Distancia_Valvula_1_m: Distancia a la válvula más cercana (metros)'],
+            ['   ✓ Dejar vacío si no conoces: se usará valor por defecto'],
+            [''],
+            ['🔧 Distancia_Valvula_2_m: Distancia a la segunda válvula (metros)'],
+            ['   ⚠ SOLO llenar si Direccion_Flujo = Bidireccional'],
+            ['   ⚠ Dejar VACÍO si es Unidireccional'],
+            [''],
+            ['═══════════════════════ EJEMPLOS PRÁCTICOS ════════════════════════'],
+            [''],
+            ['EJEMPLO A: Fuga circular simple en tubería de 4"'],
+            ['  Numero_Orden: 10'],
+            ['  Latitud: 4.8156    Longitud: -75.6961'],
+            ['  Presion_Tuberia: 60    Unidad_Presion: psig'],
+            ['  Diametro_Tuberia_Pulgadas: 4'],
+            ['  Ubicacion_Tuberia: Subterránea'],
+            ['  Direccion_Flujo: Unidireccional'],
+            ['  Tipo_Ruptura: Circular'],
+            ['  Medida_Ruptura: 25.4    Unidad_Medida_Ruptura: mm'],
+            ['  Usar_Diametro_Equivalente: NO'],
+            ['  Distancia_Valvula_1_m: 100'],
+            ['  Fecha inicio: 15/01/2024 10:30'],
+            ['  Fecha fin: 15/01/2024 11:30'],
+            [''],
+            ['EJEMPLO B: Grieta en tubería con flujo bidireccional'],
+            ['  Numero_Orden: 11'],
+            ['  Tipo_Ruptura: Recta'],
+            ['  Direccion_Flujo: Bidireccional'],
+            ['  Medida_Ruptura: 50    Unidad_Medida_Ruptura: mm'],
+            ['  Distancia_Valvula_1_m: 200'],
+            ['  Distancia_Valvula_2_m: 180    ← IMPORTANTE: llenar porque es bidireccional'],
+            [''],
+            ['══════════════════════ CONSEJOS IMPORTANTES ═══════════════════════'],
+            [''],
+            ['✓ Usa punto (.) para decimales, NO coma: 4.5 en vez de 4,5'],
+            ['✓ Revisa las hojas "Opciones_Validas" y "Diametros_Comunes"'],
+            ['✓ Cada Numero_Orden debe ser ÚNICO (no repetir)'],
+            ['✓ Usa números enteros para Numero_Orden: 4, 5, 6, 10, 100, 1001, etc.'],
+            ['✓ Puedes ELIMINAR las 3 filas de ejemplo (1, 2, 3) y agregar las tuyas'],
+            ['✓ O puedes MODIFICAR los ejemplos cambiando Numero_Orden a 4+ y los datos'],
+            ['✓ Puedes copiar y pegar filas para crear eventos similares'],
+            ['✓ Los cálculos complejos (flujo, volumen, etc.) se hacen automáticamente'],
+            ['✓ Las filas con Numero_Orden = 1, 2, 3 se omiten automáticamente'],
+            ['✗ NO cambiar los nombres de las columnas'],
+            ['✗ NO dejar filas completamente vacías entre eventos'],
+            [''],
+            ['═══════════════════════════════════════════════════════════════════'],
+            ['Si tienes dudas, contacta al administrador del sistema'],
+            ['═══════════════════════════════════════════════════════════════════']
         ])
-        instrucciones.to_excel(writer, sheet_name='Instrucciones', index=False, header=False)
+        instrucciones.to_excel(writer, sheet_name='📖 INSTRUCCIONES', index=False, header=False)
+
+    def mapear_valores_español_a_sistema(valor, campo):
+        """Traduce valores en español del Excel al formato del sistema"""
+        mapeos = {
+            'Ubicacion_Tuberia': {
+                'Subterránea': 'sub',
+                'Superficial': 'superficial',
+                'subterranea': 'sub',
+                'superficial': 'superficial'
+            },
+            'Direccion_Flujo': {
+                'Unidireccional': 'uni',
+                'Bidireccional': 'bi',
+                'unidireccional': 'uni',
+                'bidireccional': 'bi'
+            },
+            'Tipo_Ruptura': {
+                'Circular': 'circ',
+                'Recta': 'recta',
+                'Rectangular': 'rect',
+                'Triangular': 'tria',
+                'Total': 'total',
+                'circular': 'circ',
+                'recta': 'recta',
+                'rectangular': 'rect',
+                'triangular': 'tria',
+                'total': 'total'
+            },
+            'Usar_Diametro_Equivalente': {
+                'SI': 'on',
+                'NO': 'off',
+                'Si': 'on',
+                'No': 'off',
+                'si': 'on',
+                'no': 'off',
+                'SÍ': 'on',
+                'Sí': 'on',
+                'sí': 'on'
+            },
+            'Tipo_Escape': {
+                'Mínimo': 'min',
+                'Parcial': 'parcial',
+                'Total': 'total',
+                'minimo': 'min',
+                'parcial': 'parcial',
+                'total': 'total',
+                '': ''
+            }
+        }
+
+        if campo in mapeos and str(valor) in mapeos[campo]:
+            return mapeos[campo][str(valor)]
+        return valor
 
     def procesar_evento_desde_excel(form_data):
-        """Procesar un evento usando los mismos cálculos que /Resultados"""
+        """Procesar un evento usando los mismos cálculos que /Resultados con nuevo formato"""
         try:
-            # Extraer datos del diccionario (simulando request.form.get)
-            orden = form_data.get('orden', '')
-            ubicacion = form_data.get('ubicacion', '') 
-            presionTub = form_data.get('presion', '')
-            presionUni = form_data.get('presionUni', 'psig')
-            subte = form_data.get('subte', 'sub')
-            equi = 'on' if form_data.get('diameEqui', '').lower() == 'on' else None
-            escape = form_data.get('escape', '1')
-            direccion = form_data.get('Flujo', 'uni')
-            forma = form_data.get('Forma', 'circ')
-            Fdiametro = form_data.get('DiameFuga', '')
-            longitud = form_data.get('LongiFuga', '')
-            FdiametroUni = form_data.get('DiameFugaUni', 'mm')
-            longitudUni = form_data.get('LongiFugaUni', 'mm')
-            Tlargo = form_data.get('DistTube', '')
-            TlargoUni = form_data.get('DistTubeUni', 'm')
-            Tlargo2 = form_data.get('DistTube2', '')
-            TlargoUni2 = form_data.get('DistTubeUni2', 'm')
-            Tdiametro = form_data.get('DiameTube', '')
-            tiempoInicio = form_data.get('tiempoInicio', '')
-            tiempoFin = form_data.get('tiempoFin', '')
-            
-            # Validaciones básicas más detalladas
+            # Extraer datos del nuevo formato en español
+            orden = form_data.get('Numero_Orden', '')
+            latitud = form_data.get('Latitud', '')
+            longitud = form_data.get('Longitud', '')
+            ubicacion = f"{latitud},{longitud}" if latitud and longitud else ''
+
+            presionTub = form_data.get('Presion_Tuberia', '')
+            presionUni = form_data.get('Unidad_Presion', 'psig')
+            Tdiametro = form_data.get('Diametro_Tuberia_Pulgadas', '')
+
+            # Mapear valores en español a códigos del sistema
+            subte_raw = form_data.get('Ubicacion_Tuberia', 'Subterránea')
+            subte = mapear_valores_español_a_sistema(subte_raw, 'Ubicacion_Tuberia')
+
+            direccion_raw = form_data.get('Direccion_Flujo', 'Unidireccional')
+            direccion = mapear_valores_español_a_sistema(direccion_raw, 'Direccion_Flujo')
+
+            forma_raw = form_data.get('Tipo_Ruptura', 'Circular')
+            forma = mapear_valores_español_a_sistema(forma_raw, 'Tipo_Ruptura')
+
+            # Medida de ruptura y unidades
+            Fdiametro = form_data.get('Medida_Ruptura', '')
+            FdiametroUni = form_data.get('Unidad_Medida_Ruptura', 'mm')
+            longitud = Fdiametro  # Para rupturas rectas, es la misma medida
+            longitudUni = FdiametroUni
+
+            # Diámetros equivalentes
+            usar_diame_equiv_raw = form_data.get('Usar_Diametro_Equivalente', 'NO')
+            usar_diame_equiv = mapear_valores_español_a_sistema(usar_diame_equiv_raw, 'Usar_Diametro_Equivalente')
+            equi = 'on' if usar_diame_equiv == 'on' else None
+
+            escape_raw = form_data.get('Tipo_Escape', '')
+            escape = mapear_valores_español_a_sistema(escape_raw, 'Tipo_Escape')
+            if not escape:
+                escape = 'min'  # Valor por defecto
+
+            # Distancias (ya en metros)
+            Tlargo = form_data.get('Distancia_Valvula_1_m', '')
+            TlargoUni = 'm'  # Siempre en metros en el nuevo formato
+            Tlargo2 = form_data.get('Distancia_Valvula_2_m', '')
+            TlargoUni2 = 'm'
+
+            # Construir fechas desde componentes individuales
+            try:
+                año_inicio = int(form_data.get('Año_Inicio', 2024))
+                mes_inicio = int(form_data.get('Mes_Inicio', 1))
+                dia_inicio = int(form_data.get('Dia_Inicio', 1))
+                hora_inicio = int(form_data.get('Hora_Inicio', 0))
+                minuto_inicio = int(form_data.get('Minuto_Inicio', 0))
+
+                año_fin = int(form_data.get('Año_Fin', 2024))
+                mes_fin = int(form_data.get('Mes_Fin', 1))
+                dia_fin = int(form_data.get('Dia_Fin', 1))
+                hora_fin = int(form_data.get('Hora_Fin', 1))
+                minuto_fin = int(form_data.get('Minuto_Fin', 0))
+
+                tiempoInicio = f"{año_inicio:04d}-{mes_inicio:02d}-{dia_inicio:02d}T{hora_inicio:02d}:{minuto_inicio:02d}"
+                tiempoFin = f"{año_fin:04d}-{mes_fin:02d}-{dia_fin:02d}T{hora_fin:02d}:{minuto_fin:02d}"
+            except (ValueError, TypeError) as e:
+                return {'status': 'error', 'error': f'Error en formato de fecha/hora: {str(e)}. Verifica que todos los campos de fecha sean números válidos'}
+
+            # Validaciones básicas
             campos_vacios = []
-            if not orden: campos_vacios.append('orden')
-            if not ubicacion: campos_vacios.append('ubicacion')
-            if not presionTub: campos_vacios.append('presion')
-            if not Tdiametro: campos_vacios.append('DiameTube')
-            if not tiempoInicio: campos_vacios.append('tiempoInicio')
-            if not tiempoFin: campos_vacios.append('tiempoFin')
-            
+            if not orden: campos_vacios.append('Numero_Orden')
+            if not ubicacion or latitud == '' or longitud == '': campos_vacios.append('Latitud/Longitud')
+            if not presionTub: campos_vacios.append('Presion_Tuberia')
+            if not Tdiametro: campos_vacios.append('Diametro_Tuberia_Pulgadas')
+
             if campos_vacios:
                 return {'status': 'error', 'error': f'Campos obligatorios faltantes: {", ".join(campos_vacios)}'}
-                
-            # Validación especial para ejemplo
-            if orden.upper().startswith('EJEMPLO') or orden.upper().startswith('CAMBIAR'):
-                return {'status': 'error', 'error': 'Debes cambiar la orden de ejemplo por un valor único (ej: EV-2024-001, RUPTURA-001)'}
+
+            # Validación especial para ejemplos (solo omitir filas claramente marcadas como ejemplo)
+            orden_str = str(orden).upper()
+            # Omitir ejemplos: números 1, 2, 3 o texto que empiece con EJEMPLO/CAMBIAR
+            if orden_str.startswith('EJEMPLO') or orden_str.startswith('CAMBIAR') or orden in [1, 2, 3, '1', '2', '3']:
+                return {'status': 'skip', 'error': f'Fila de ejemplo omitida: {orden}'}
             
             # Conversiones de tipos (misma lógica que /Resultados)
             presionTub = float(presionTub)
@@ -1365,40 +1671,45 @@ def init_web_routes(app):
             
             eventos_creados = 0
             eventos_fallidos = 0
+            eventos_omitidos = 0
             errores = []
-            
+
             for index, row in df.iterrows():
                 try:
-                    # Saltar filas vacías o de ejemplo
-                    if pd.isna(row.get('orden')) or row.get('orden') in ['EJEMPLO-001', 'EV-2024-001']:
+                    # Saltar filas completamente vacías
+                    if pd.isna(row.get('Numero_Orden')):
                         continue
-                    
+
                     # Simular el llenado del formulario de crear evento
                     form_data = {}
                     for col in df.columns:
                         form_data[col] = '' if pd.isna(row[col]) else str(row[col])
-                    
+
                     # Procesar usando la misma lógica que /Resultados
                     resultado = procesar_evento_desde_excel(form_data)
-                    
+
                     if resultado['status'] == 'exito':
                         eventos_creados += 1
+                    elif resultado['status'] == 'skip':
+                        eventos_omitidos += 1
+                        # No reportar como error las filas de ejemplo
                     else:
                         eventos_fallidos += 1
-                        errores.append(f"Fila {index + 2}: {resultado['error']}")
-                        
+                        errores.append(f"Fila {index + 2} ({row.get('Numero_Orden', 'Sin orden')}): {resultado['error']}")
+
                 except Exception as e:
                     eventos_fallidos += 1
-                    errores.append(f"Fila {index + 2}: {str(e)}")
+                    errores.append(f"Fila {index + 2} ({row.get('Numero_Orden', 'Sin orden')}): {str(e)}")
             
             # Log para debugging
-            print(f"Carga masiva completada: {eventos_creados} creados, {eventos_fallidos} fallidos")
+            print(f"Carga masiva completada: {eventos_creados} creados, {eventos_fallidos} fallidos, {eventos_omitidos} omitidos")
             for error in errores[:5]:  # Mostrar primeros 5 errores en consola
                 print(f"Error: {error}")
-                
+
             return {
                 'eventos_creados': eventos_creados,
                 'eventos_fallidos': eventos_fallidos,
+                'eventos_omitidos': eventos_omitidos,
                 'errores': errores[:10]  # Limitar a 10 errores para no sobrecargar
             }
             
