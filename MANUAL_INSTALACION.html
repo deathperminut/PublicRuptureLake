@@ -1,0 +1,1756 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual de Instalación - RuptureLakes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .version {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+
+        .nav {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 2px solid #dee2e6;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: #2a5298;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav a:hover {
+            background: #2a5298;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 60px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section h2 {
+            color: #1e3c72;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #2a5298;
+        }
+
+        .section h3 {
+            color: #2a5298;
+            font-size: 1.8em;
+            margin: 30px 0 15px 0;
+        }
+
+        .section h4 {
+            color: #667eea;
+            font-size: 1.3em;
+            margin: 20px 0 10px 0;
+        }
+
+        .card {
+            background: #f8f9fa;
+            border-left: 4px solid #2a5298;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .card-success {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+
+        .card-warning {
+            border-left-color: #ffc107;
+            background: #fff3cd;
+        }
+
+        .card-danger {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .card-info {
+            border-left-color: #17a2b8;
+            background: #d1ecf1;
+        }
+
+        .diagram {
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 30px;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .diagram svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            position: relative;
+            overflow-x: auto;
+        }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: #45a049;
+            transform: scale(1.05);
+        }
+
+        .copy-btn:active {
+            transform: scale(0.95);
+        }
+
+        .step {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            margin: 20px 0 10px 0;
+        }
+
+        .checklist {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .checklist li {
+            padding: 10px 0;
+            padding-left: 35px;
+            position: relative;
+        }
+
+        .checklist li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #28a745;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .requirement {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            margin: 10px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .requirement-icon {
+            font-size: 2em;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .badge-warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .badge-info {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .footer {
+            background: #1e3c72;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .nav ul {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .section h2 {
+                font-size: 1.8em;
+            }
+        }
+
+        .architecture-box {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .architecture-box h4 {
+            margin-top: 0;
+            color: #2a5298;
+        }
+
+        .flow-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .flow-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            min-width: 150px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .flow-arrow {
+            font-size: 2em;
+            color: #2a5298;
+        }
+
+        .command-line {
+            background: #2d2d2d;
+            color: #4CAF50;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🚀 RuptureLakes</h1>
+            <p>Manual de Instalación y Despliegue</p>
+            <div class="version">Versión 1.0 - Noviembre 2024</div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="nav">
+            <ul>
+                <li><a href="#introduccion">📖 Introducción</a></li>
+                <li><a href="#requisitos">⚙️ Requisitos</a></li>
+                <li><a href="#arquitectura">🏗️ Arquitectura</a></li>
+                <li><a href="#servidor">🖥️ Servidor Linux</a></li>
+                <li><a href="#kubernetes">☸️ Kubernetes (Azure)</a></li>
+                <li><a href="#configuracion">🔧 Configuración</a></li>
+                <li><a href="#troubleshooting">🔍 Solución de Problemas</a></li>
+            </ul>
+        </nav>
+
+        <!-- Content -->
+        <div class="content">
+            <!-- Introducción -->
+            <section id="introduccion" class="section">
+                <h2>📖 Introducción</h2>
+
+                <div class="card card-info">
+                    <h3>¿Qué es RuptureLakes?</h3>
+                    <p><strong>RuptureLakes</strong> es una aplicación web desarrollada en Flask para la gestión y análisis de eventos de ruptura en tuberías de gas. El sistema incluye:</p>
+                    <ul class="checklist">
+                        <li>Modelado matemático avanzado de flujo de gas</li>
+                        <li>Gestión de eventos con geolocalización (GPS)</li>
+                        <li>Carga masiva de datos desde Excel</li>
+                        <li>Control de acceso basado en roles (RBAC)</li>
+                        <li>API REST completa</li>
+                        <li>Interfaz web intuitiva</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3>Stack Tecnológico</h3>
+                    <div class="table-container">
+                        <table>
+                            <tr>
+                                <th>Componente</th>
+                                <th>Tecnología</th>
+                                <th>Versión</th>
+                            </tr>
+                            <tr>
+                                <td>Backend</td>
+                                <td>Python Flask</td>
+                                <td>Python 3.9+</td>
+                            </tr>
+                            <tr>
+                                <td>Base de Datos</td>
+                                <td>MongoDB</td>
+                                <td>5.0+</td>
+                            </tr>
+                            <tr>
+                                <td>Frontend</td>
+                                <td>Jinja2 + Bootstrap 5</td>
+                                <td>5.3.2</td>
+                            </tr>
+                            <tr>
+                                <td>Contenedores</td>
+                                <td>Docker + Docker Compose</td>
+                                <td>20.10+</td>
+                            </tr>
+                            <tr>
+                                <td>Orquestación (Producción)</td>
+                                <td>Kubernetes</td>
+                                <td>1.24+</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Requisitos -->
+            <section id="requisitos" class="section">
+                <h2>⚙️ Requisitos del Sistema</h2>
+
+                <h3>Opción 1: Servidor Linux (Docker)</h3>
+                <div class="card">
+                    <div class="requirement">
+                        <div class="requirement-icon">💻</div>
+                        <div>
+                            <strong>Sistema Operativo</strong><br>
+                            Ubuntu 20.04+ / Debian 11+ / CentOS 8+ / RHEL 8+
+                        </div>
+                    </div>
+
+                    <div class="requirement">
+                        <div class="requirement-icon">🧠</div>
+                        <div>
+                            <strong>RAM</strong><br>
+                            Mínimo: 2 GB | Recomendado: 4 GB
+                        </div>
+                    </div>
+
+                    <div class="requirement">
+                        <div class="requirement-icon">💾</div>
+                        <div>
+                            <strong>Disco Duro</strong><br>
+                            Mínimo: 10 GB | Recomendado: 20 GB (SSD preferible)
+                        </div>
+                    </div>
+
+                    <div class="requirement">
+                        <div class="requirement-icon">🔌</div>
+                        <div>
+                            <strong>CPU</strong><br>
+                            Mínimo: 2 vCPUs | Recomendado: 4 vCPUs
+                        </div>
+                    </div>
+
+                    <div class="requirement">
+                        <div class="requirement-icon">🌐</div>
+                        <div>
+                            <strong>Red</strong><br>
+                            Puerto 4500 (Flask) y 27017 (MongoDB) disponibles
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Opción 2: Kubernetes (Azure AKS)</h3>
+                <div class="card">
+                    <div class="requirement">
+                        <div class="requirement-icon">☁️</div>
+                        <div>
+                            <strong>Azure Subscription</strong><br>
+                            Suscripción activa de Microsoft Azure
+                        </div>
+                    </div>
+
+                    <div class="requirement">
+                        <div class="requirement-icon">☸️</div>
+                        <div>
+                            <strong>AKS Cluster</strong><br>
+                            Kubernetes 1.24+ con mínimo 2 nodos (Standard_B2s o superior)
+                        </div>
+                    </div>
+
+                    <div class="requirement">
+                        <div class="requirement-icon">📦</div>
+                        <div>
+                            <strong>Azure Container Registry (ACR)</strong><br>
+                            Para almacenar imágenes Docker
+                        </div>
+                    </div>
+
+                    <div class="requirement">
+                        <div class="requirement-icon">💽</div>
+                        <div>
+                            <strong>Azure Disk Storage</strong><br>
+                            Para persistencia de datos de MongoDB
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Software Requerido</h3>
+                <div class="table-container">
+                    <table>
+                        <tr>
+                            <th>Software</th>
+                            <th>Versión Mínima</th>
+                            <th>Propósito</th>
+                        </tr>
+                        <tr>
+                            <td>Docker</td>
+                            <td>20.10+</td>
+                            <td>Contenedorización</td>
+                        </tr>
+                        <tr>
+                            <td>Docker Compose</td>
+                            <td>2.0+</td>
+                            <td>Orquestación local</td>
+                        </tr>
+                        <tr>
+                            <td>kubectl</td>
+                            <td>1.24+</td>
+                            <td>Gestión de Kubernetes</td>
+                        </tr>
+                        <tr>
+                            <td>Azure CLI</td>
+                            <td>2.40+</td>
+                            <td>Gestión de Azure (solo para AKS)</td>
+                        </tr>
+                        <tr>
+                            <td>Git</td>
+                            <td>2.30+</td>
+                            <td>Control de versiones</td>
+                        </tr>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Arquitectura -->
+            <section id="arquitectura" class="section">
+                <h2>🏗️ Arquitectura del Sistema</h2>
+
+                <div class="card">
+                    <h3>Componentes Principales</h3>
+                    <div class="flow-container">
+                        <div class="flow-box">
+                            <h4>Usuario</h4>
+                            <p>Navegador Web</p>
+                        </div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-box">
+                            <h4>Flask App</h4>
+                            <p>Puerto 4500</p>
+                        </div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-box">
+                            <h4>MongoDB</h4>
+                            <p>Puerto 27017</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="diagram">
+                    <h3>Diagrama de Arquitectura - Docker</h3>
+                    <svg viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Docker Host -->
+                        <rect x="50" y="50" width="700" height="300" fill="#f0f0f0" stroke="#333" stroke-width="2" rx="10"/>
+                        <text x="400" y="80" text-anchor="middle" font-size="20" font-weight="bold">Docker Host</text>
+
+                        <!-- Network -->
+                        <rect x="100" y="110" width="600" height="220" fill="#e3f2fd" stroke="#2196F3" stroke-width="2" rx="5"/>
+                        <text x="400" y="140" text-anchor="middle" font-size="16" fill="#1976D2">rupture_network (bridge)</text>
+
+                        <!-- Flask Container -->
+                        <rect x="130" y="160" width="250" height="140" fill="#4CAF50" stroke="#2E7D32" stroke-width="2" rx="5"/>
+                        <text x="255" y="190" text-anchor="middle" font-size="16" font-weight="bold" fill="white">Flask App Container</text>
+                        <text x="255" y="215" text-anchor="middle" font-size="12" fill="white">Image: rupturelakes:latest</text>
+                        <text x="255" y="235" text-anchor="middle" font-size="12" fill="white">Port: 4500:4500</text>
+                        <text x="255" y="255" text-anchor="middle" font-size="12" fill="white">Python 3.9 + Flask</text>
+                        <text x="255" y="275" text-anchor="middle" font-size="12" fill="white">Volume: ./src → /app</text>
+
+                        <!-- MongoDB Container -->
+                        <rect x="420" y="160" width="250" height="140" fill="#4CAF50" stroke="#2E7D32" stroke-width="2" rx="5"/>
+                        <text x="545" y="190" text-anchor="middle" font-size="16" font-weight="bold" fill="white">MongoDB Container</text>
+                        <text x="545" y="215" text-anchor="middle" font-size="12" fill="white">Image: mongo:5.0</text>
+                        <text x="545" y="235" text-anchor="middle" font-size="12" fill="white">Port: 27017:27017</text>
+                        <text x="545" y="255" text-anchor="middle" font-size="12" fill="white">DB: rupture</text>
+                        <text x="545" y="275" text-anchor="middle" font-size="12" fill="white">Volume: ./mongo_data</text>
+
+                        <!-- Connection Arrow -->
+                        <line x1="380" y1="230" x2="420" y2="230" stroke="#FF5722" stroke-width="3" marker-end="url(#arrowhead)"/>
+                        <text x="400" y="225" text-anchor="middle" font-size="10" fill="#FF5722">TCP</text>
+
+                        <!-- External Access -->
+                        <line x1="255" y1="160" x2="255" y2="50" stroke="#2196F3" stroke-width="3" marker-end="url(#arrowhead2)"/>
+                        <text x="270" y="100" font-size="12" fill="#2196F3">http://localhost:4500</text>
+
+                        <!-- Arrow markers -->
+                        <defs>
+                            <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                <polygon points="0 0, 10 3, 0 6" fill="#FF5722" />
+                            </marker>
+                            <marker id="arrowhead2" markerWidth="10" markerHeight="10" refX="3" refY="0" orient="auto">
+                                <polygon points="0 0, 3 10, 6 0" fill="#2196F3" />
+                            </marker>
+                        </defs>
+                    </svg>
+                </div>
+
+                <div class="diagram">
+                    <h3>Diagrama de Arquitectura - Kubernetes (AKS)</h3>
+                    <svg viewBox="0 0 900 500" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Azure Cloud -->
+                        <rect x="30" y="30" width="840" height="440" fill="#e8f4fd" stroke="#0078D4" stroke-width="3" rx="15"/>
+                        <text x="450" y="60" text-anchor="middle" font-size="22" font-weight="bold" fill="#0078D4">Azure Cloud</text>
+
+                        <!-- AKS Cluster -->
+                        <rect x="70" y="90" width="760" height="360" fill="#fff" stroke="#0078D4" stroke-width="2" rx="10"/>
+                        <text x="450" y="120" text-anchor="middle" font-size="18" font-weight="bold">Azure Kubernetes Service (AKS)</text>
+
+                        <!-- Namespace -->
+                        <rect x="100" y="140" width="700" height="290" fill="#f0f7ff" stroke="#1976D2" stroke-width="2" rx="8"/>
+                        <text x="450" y="165" text-anchor="middle" font-size="16" fill="#1976D2">Namespace: rupturelakes</text>
+
+                        <!-- Flask Deployment -->
+                        <rect x="130" y="190" width="300" height="220" fill="#4CAF50" stroke="#2E7D32" stroke-width="2" rx="5"/>
+                        <text x="280" y="215" text-anchor="middle" font-size="16" font-weight="bold" fill="white">Flask Deployment</text>
+
+                        <!-- Pod 1 -->
+                        <rect x="150" y="230" width="120" height="80" fill="#66BB6A" stroke="#2E7D32" stroke-width="1" rx="3"/>
+                        <text x="210" y="255" text-anchor="middle" font-size="12" fill="white">Pod 1</text>
+                        <text x="210" y="275" text-anchor="middle" font-size="10" fill="white">flask-app</text>
+                        <text x="210" y="290" text-anchor="middle" font-size="10" fill="white">Replicas: 2</text>
+
+                        <!-- Pod 2 -->
+                        <rect x="290" y="230" width="120" height="80" fill="#66BB6A" stroke="#2E7D32" stroke-width="1" rx="3"/>
+                        <text x="350" y="255" text-anchor="middle" font-size="12" fill="white">Pod 2</text>
+                        <text x="350" y="275" text-anchor="middle" font-size="10" fill="white">flask-app</text>
+
+                        <!-- Service -->
+                        <rect x="150" y="330" width="260" height="60" fill="#81C784" stroke="#2E7D32" stroke-width="1" rx="3"/>
+                        <text x="280" y="355" text-anchor="middle" font-size="14" fill="white">Service (LoadBalancer)</text>
+                        <text x="280" y="375" text-anchor="middle" font-size="11" fill="white">Port: 4500</text>
+
+                        <!-- MongoDB StatefulSet -->
+                        <rect x="470" y="190" width="300" height="220" fill="#FF9800" stroke="#E65100" stroke-width="2" rx="5"/>
+                        <text x="620" y="215" text-anchor="middle" font-size="16" font-weight="bold" fill="white">MongoDB StatefulSet</text>
+
+                        <!-- MongoDB Pod -->
+                        <rect x="510" y="230" width="220" height="80" fill="#FFB74D" stroke="#E65100" stroke-width="1" rx="3"/>
+                        <text x="620" y="255" text-anchor="middle" font-size="12" fill="white">mongodb-0</text>
+                        <text x="620" y="275" text-anchor="middle" font-size="10" fill="white">mongo:5.0</text>
+                        <text x="620" y="290" text-anchor="middle" font-size="10" fill="white">Port: 27017</text>
+
+                        <!-- PersistentVolume -->
+                        <rect x="510" y="330" width="220" height="60" fill="#FFCC80" stroke="#E65100" stroke-width="1" rx="3"/>
+                        <text x="620" y="355" text-anchor="middle" font-size="14" fill="white">PersistentVolume</text>
+                        <text x="620" y="375" text-anchor="middle" font-size="11" fill="white">Azure Disk (20GB)</text>
+
+                        <!-- Connection -->
+                        <line x1="430" y1="280" x2="470" y2="280" stroke="#FF5722" stroke-width="3"/>
+                        <text x="450" y="275" text-anchor="middle" font-size="10" fill="#FF5722">TCP</text>
+
+                        <!-- External Access -->
+                        <line x1="280" y1="190" x2="280" y2="90" stroke="#2196F3" stroke-width="3"/>
+                        <text x="310" y="135" font-size="12" fill="#2196F3">Public IP</text>
+                    </svg>
+                </div>
+
+                <div class="card card-info">
+                    <h3>Colecciones de MongoDB</h3>
+                    <ul>
+                        <li><strong>users</strong>: Usuarios del sistema (email, password, rol, estado)</li>
+                        <li><strong>events</strong>: Eventos de ruptura (orden, ubicación, presión, cálculos, etc.)</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Instalación en Servidor -->
+            <section id="servidor" class="section">
+                <h2>🖥️ Instalación en Servidor Linux</h2>
+
+                <div class="step">PASO 1: Preparar el Servidor</div>
+
+                <h4>1.1 Actualizar el Sistema</h4>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                    <pre># Ubuntu/Debian
+sudo apt update && sudo apt upgrade -y
+
+# CentOS/RHEL
+sudo yum update -y</pre>
+                </div>
+
+                <h4>1.2 Instalar Docker</h4>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                    <pre># Instalar Docker (Ubuntu/Debian)
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+
+# Agregar usuario al grupo docker
+sudo usermod -aG docker $USER
+
+# Reiniciar sesión para aplicar cambios
+newgrp docker
+
+# Verificar instalación
+docker --version</pre>
+                </div>
+
+                <h4>1.3 Instalar Docker Compose</h4>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                    <pre># Descargar Docker Compose
+sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+
+# Dar permisos de ejecución
+sudo chmod +x /usr/local/bin/docker-compose
+
+# Verificar instalación
+docker-compose --version</pre>
+                </div>
+
+                <div class="step">PASO 2: Clonar el Repositorio</div>
+
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                    <pre># Instalar Git si no está instalado
+sudo apt install git -y  # Ubuntu/Debian
+sudo yum install git -y  # CentOS/RHEL
+
+# Clonar el repositorio
+git clone https://github.com/tu-organizacion/RuptureLakes.git
+cd RuptureLakes
+
+# Verificar estructura del proyecto
+ls -la</pre>
+                </div>
+
+                <div class="step">PASO 3: Configurar Variables de Entorno</div>
+
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                    <pre># Copiar el archivo de ejemplo
+cp .env.docker.example .env.docker
+
+# Editar el archivo con tu editor favorito
+nano .env.docker  # o vim, vi, etc.</pre>
+                </div>
+
+                <div class="card card-warning">
+                    <h4>⚠️ Archivo .env.docker</h4>
+                    <p>Personaliza las siguientes variables:</p>
+                </div>
+
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                    <pre># MongoDB Configuration
+MONGO_INITDB_ROOT_USERNAME=admin
+MONGO_INITDB_ROOT_PASSWORD=TU_PASSWORD_SEGURO_AQUI
+MONGO_DATA_PATH=./mongo_data
+
+# Flask App MongoDB Connection
+MONGO_HOST=mongodb_efigas
+MONGO_PORT=27017
+MONGO_USERNAME=admin
+MONGO_PASSWORD=TU_PASSWORD_SEGURO_AQUI
+MONGO_DATABASE=rupture
+
+# Flask Configuration
+FLASK_HOST=0.0.0.0
+FLASK_PORT=4500
+FLASK_DEBUG=false</pre>
+                </div>
+
+                <div class="card card-danger">
+                    <h4>🔐 Seguridad</h4>
+                    <ul>
+                        <li>Cambia <strong>TU_PASSWORD_SEGURO_AQUI</strong> por una contraseña fuerte</li>
+                        <li>Usa al menos 16 caracteres con mayúsculas, minúsculas, números y símbolos</li>
+                        <li>No compartas el archivo <code>.env.docker</code> en repositorios públicos</li>
+                        <li>Agrega <code>.env.docker</code> al archivo <code>.gitignore</code></li>
+                    </ul>
+                </div>
+
+                <div class="step">PASO 4: Construir y Levantar los Contenedores</div>
+
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                    <pre># Construir las imágenes
+docker-compose --env-file .env.docker build
+
+# Levantar los contenedores en segundo plano
+docker-compose --env-file .env.docker up -d
+
+# Ver los logs
+docker-compose --env-file .env.docker logs -f</pre>
+                </div>
+
+                <div class="card card-success">
+                    <h4>✅ Verificar que todo esté corriendo</h4>
+                </div>
+
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                    <pre># Ver contenedores activos
+docker-compose --env-file .env.docker ps
+
+# Deberías ver algo como:
+# NAME                    STATUS    PORTS
+# rupturelakes-flask_app  running   0.0.0.0:4500->4500/tcp
+# rupturelakes-mongodb    running   27017/tcp</pre>
+                </div>
+
+                <div class="step">PASO 5: Inicializar la Base de Datos</div>
+
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                    <pre># La inicialización se hace automáticamente al levantar los contenedores
+# pero puedes verificar que se creó la base de datos
+
+# Conectar a MongoDB
+docker-compose --env-file .env.docker exec mongodb_efigas mongosh -u admin -p TU_PASSWORD
+
+# Dentro de MongoDB:
+use rupture
+show collections
+# Deberías ver: events, users
+
+exit</pre>
+                </div>
+
+                <div class="step">PASO 6: Crear SuperAdmin</div>
+
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                    <pre># Ejecutar el script de creación de SuperAdmin
+docker-compose --env-file .env.docker exec flask_app python create_superadmin.py
+
+# Sigue las instrucciones:
+# - Ingresa nombre
+# - Ingresa apellido
+# - Ingresa email
+# - Ingresa identificación
+# - Ingresa contraseña segura</pre>
+                </div>
+
+                <div class="step">PASO 7: Acceder a la Aplicación</div>
+
+                <div class="card card-success">
+                    <h3>🎉 ¡Instalación Completada!</h3>
+                    <p>Abre tu navegador y accede a:</p>
+                    <p style="text-align: center; font-size: 1.3em; margin: 20px 0;">
+                        <strong>http://IP_DE_TU_SERVIDOR:4500</strong>
+                    </p>
+                    <p>Inicia sesión con las credenciales del SuperAdmin que creaste.</p>
+                </div>
+
+                <h3>Comandos Útiles</h3>
+
+                <div class="table-container">
+                    <table>
+                        <tr>
+                            <th>Acción</th>
+                            <th>Comando</th>
+                        </tr>
+                        <tr>
+                            <td>Detener contenedores</td>
+                            <td><code>docker-compose --env-file .env.docker down</code></td>
+                        </tr>
+                        <tr>
+                            <td>Reiniciar contenedores</td>
+                            <td><code>docker-compose --env-file .env.docker restart</code></td>
+                        </tr>
+                        <tr>
+                            <td>Ver logs de Flask</td>
+                            <td><code>docker-compose --env-file .env.docker logs -f flask_app</code></td>
+                        </tr>
+                        <tr>
+                            <td>Ver logs de MongoDB</td>
+                            <td><code>docker-compose --env-file .env.docker logs -f mongodb_efigas</code></td>
+                        </tr>
+                        <tr>
+                            <td>Acceder a shell de Flask</td>
+                            <td><code>docker-compose --env-file .env.docker exec flask_app bash</code></td>
+                        </tr>
+                        <tr>
+                            <td>Backup de MongoDB</td>
+                            <td><code>docker-compose --env-file .env.docker exec mongodb_efigas mongodump --out /backup</code></td>
+                        </tr>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Instalación en Kubernetes -->
+            <section id="kubernetes" class="section">
+                <h2>☸️ Instalación en Kubernetes (Azure AKS)</h2>
+
+                <div class="card card-info">
+                    <h3>📋 Pre-requisitos</h3>
+                    <ul class="checklist">
+                        <li>Cuenta de Azure activa</li>
+                        <li>Azure CLI instalado y configurado</li>
+                        <li>kubectl instalado</li>
+                        <li>Permisos para crear recursos en Azure</li>
+                    </ul>
+                </div>
+
+                <div class="step">PASO 1: Instalar Herramientas</div>
+
+                <h4>1.1 Instalar Azure CLI</h4>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                    <pre># Linux (Ubuntu/Debian)
+curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
+# macOS
+brew install azure-cli
+
+# Windows (PowerShell como Administrador)
+# Descargar desde: https://aka.ms/installazurecliwindows
+
+# Verificar instalación
+az --version</pre>
+                </div>
+
+                <h4>1.2 Instalar kubectl</h4>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                    <pre># Linux
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+
+# macOS
+brew install kubectl
+
+# Verificar instalación
+kubectl version --client</pre>
+                </div>
+
+                <div class="step">PASO 2: Configurar Azure</div>
+
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                    <pre># Iniciar sesión en Azure
+az login
+
+# Seleccionar suscripción (si tienes múltiples)
+az account list --output table
+az account set --subscription "TU_SUBSCRIPTION_ID"
+
+# Crear grupo de recursos
+az group create \
+  --name rupturelakes-rg \
+  --location eastus
+
+# Verificar
+az group show --name rupturelakes-rg</pre>
+                </div>
+
+                <div class="step">PASO 3: Crear Azure Container Registry (ACR)</div>
+
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                    <pre># Crear ACR
+az acr create \
+  --resource-group rupturelakes-rg \
+  --name rupturelakesacr \
+  --sku Basic
+
+# Habilitar acceso de administrador
+az acr update -n rupturelakesacr --admin-enabled true
+
+# Obtener credenciales
+az acr credential show --name rupturelakesacr
+
+# Iniciar sesión en ACR
+az acr login --name rupturelakesacr</pre>
+                </div>
+
+                <div class="step">PASO 4: Construir y Subir Imagen Docker</div>
+
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                    <pre># Navegar al directorio del proyecto
+cd RuptureLakes
+
+# Construir la imagen
+docker build -t rupturelakes:latest .
+
+# Etiquetar la imagen para ACR
+docker tag rupturelakes:latest rupturelakesacr.azurecr.io/rupturelakes:v1.0
+
+# Subir la imagen a ACR
+docker push rupturelakesacr.azurecr.io/rupturelakes:v1.0
+
+# Verificar que la imagen esté en ACR
+az acr repository list --name rupturelakesacr --output table</pre>
+                </div>
+
+                <div class="step">PASO 5: Crear Cluster de AKS</div>
+
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                    <pre># Crear cluster AKS con 2 nodos
+az aks create \
+  --resource-group rupturelakes-rg \
+  --name rupturelakes-aks \
+  --node-count 2 \
+  --node-vm-size Standard_B2s \
+  --generate-ssh-keys \
+  --attach-acr rupturelakesacr
+
+# Este proceso puede tardar 5-10 minutos
+# Espera a que termine...</pre>
+                </div>
+
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                    <pre># Obtener credenciales de kubectl
+az aks get-credentials \
+  --resource-group rupturelakes-rg \
+  --name rupturelakes-aks
+
+# Verificar conexión
+kubectl get nodes
+
+# Deberías ver 2 nodos en estado Ready</pre>
+                </div>
+
+                <div class="step">PASO 6: Crear Namespace</div>
+
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                    <pre># Crear namespace
+kubectl create namespace rupturelakes
+
+# Verificar
+kubectl get namespaces</pre>
+                </div>
+
+                <div class="step">PASO 7: Crear Secrets</div>
+
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                    <pre># Crear secret para MongoDB
+kubectl create secret generic mongodb-secret \
+  --from-literal=username=admin \
+  --from-literal=password=TU_PASSWORD_SEGURO_AQUI \
+  -n rupturelakes
+
+# Verificar
+kubectl get secrets -n rupturelakes</pre>
+                </div>
+
+                <div class="step">PASO 8: Crear Manifiestos de Kubernetes</div>
+
+                <h4>8.1 MongoDB StatefulSet</h4>
+                <div class="card">
+                    <p>Crear archivo <code>k8s/mongodb-statefulset.yaml</code></p>
+                </div>
+
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                    <pre>apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb
+  namespace: rupturelakes
+spec:
+  ports:
+  - port: 27017
+    targetPort: 27017
+  clusterIP: None
+  selector:
+    app: mongodb
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongodb
+  namespace: rupturelakes
+spec:
+  serviceName: mongodb
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+      - name: mongodb
+        image: mongo:5.0
+        ports:
+        - containerPort: 27017
+          name: mongodb
+        env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-secret
+              key: username
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-secret
+              key: password
+        volumeMounts:
+        - name: mongodb-data
+          mountPath: /data/db
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+  volumeClaimTemplates:
+  - metadata:
+      name: mongodb-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: managed-premium
+      resources:
+        requests:
+          storage: 20Gi</pre>
+                </div>
+
+                <h4>8.2 Flask Deployment</h4>
+                <div class="card">
+                    <p>Crear archivo <code>k8s/flask-deployment.yaml</code></p>
+                </div>
+
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                    <pre>apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flask-app
+  namespace: rupturelakes
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: flask-app
+  template:
+    metadata:
+      labels:
+        app: flask-app
+    spec:
+      containers:
+      - name: flask-app
+        image: rupturelakesacr.azurecr.io/rupturelakes:v1.0
+        ports:
+        - containerPort: 4500
+        env:
+        - name: MONGO_HOST
+          value: "mongodb-0.mongodb.rupturelakes.svc.cluster.local"
+        - name: MONGO_PORT
+          value: "27017"
+        - name: MONGO_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-secret
+              key: username
+        - name: MONGO_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-secret
+              key: password
+        - name: MONGO_DATABASE
+          value: "rupture"
+        - name: FLASK_HOST
+          value: "0.0.0.0"
+        - name: FLASK_PORT
+          value: "4500"
+        - name: FLASK_DEBUG
+          value: "false"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /Inicio
+            port: 4500
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /Inicio
+            port: 4500
+          initialDelaySeconds: 10
+          periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flask-service
+  namespace: rupturelakes
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 4500
+    protocol: TCP
+  selector:
+    app: flask-app</pre>
+                </div>
+
+                <div class="step">PASO 9: Desplegar en Kubernetes</div>
+
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                    <pre># Crear directorio para manifiestos
+mkdir -p k8s
+
+# (Guarda los archivos YAML arriba en el directorio k8s/)
+
+# Aplicar MongoDB
+kubectl apply -f k8s/mongodb-statefulset.yaml
+
+# Esperar a que MongoDB esté listo
+kubectl wait --for=condition=ready pod -l app=mongodb -n rupturelakes --timeout=300s
+
+# Aplicar Flask
+kubectl apply -f k8s/flask-deployment.yaml
+
+# Ver el estado de los pods
+kubectl get pods -n rupturelakes -w</pre>
+                </div>
+
+                <div class="step">PASO 10: Obtener IP Pública</div>
+
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                    <pre># Obtener la IP pública del LoadBalancer
+kubectl get service flask-service -n rupturelakes
+
+# Espera a que aparezca la EXTERNAL-IP
+# Puede tardar 2-3 minutos
+
+# Cuando aparezca, accede a:
+# http://EXTERNAL-IP</pre>
+                </div>
+
+                <div class="card card-success">
+                    <h3>🎉 ¡Despliegue en Kubernetes Completado!</h3>
+                    <p>Tu aplicación ahora está corriendo en Azure Kubernetes Service con:</p>
+                    <ul class="checklist">
+                        <li>2 réplicas de Flask para alta disponibilidad</li>
+                        <li>MongoDB con almacenamiento persistente</li>
+                        <li>LoadBalancer con IP pública</li>
+                        <li>Health checks automáticos</li>
+                        <li>Escalabilidad automática</li>
+                    </ul>
+                </div>
+
+                <h3>Comandos Útiles de Kubernetes</h3>
+
+                <div class="table-container">
+                    <table>
+                        <tr>
+                            <th>Acción</th>
+                            <th>Comando</th>
+                        </tr>
+                        <tr>
+                            <td>Ver todos los recursos</td>
+                            <td><code>kubectl get all -n rupturelakes</code></td>
+                        </tr>
+                        <tr>
+                            <td>Ver logs de Flask</td>
+                            <td><code>kubectl logs -f deployment/flask-app -n rupturelakes</code></td>
+                        </tr>
+                        <tr>
+                            <td>Ver logs de MongoDB</td>
+                            <td><code>kubectl logs -f statefulset/mongodb -n rupturelakes</code></td>
+                        </tr>
+                        <tr>
+                            <td>Escalar Flask</td>
+                            <td><code>kubectl scale deployment flask-app --replicas=3 -n rupturelakes</code></td>
+                        </tr>
+                        <tr>
+                            <td>Acceder a pod de Flask</td>
+                            <td><code>kubectl exec -it deployment/flask-app -n rupturelakes -- bash</code></td>
+                        </tr>
+                        <tr>
+                            <td>Acceder a MongoDB</td>
+                            <td><code>kubectl exec -it statefulset/mongodb -n rupturelakes -- mongosh</code></td>
+                        </tr>
+                        <tr>
+                            <td>Eliminar todo</td>
+                            <td><code>kubectl delete namespace rupturelakes</code></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <h3>Costos Estimados de Azure</h3>
+
+                <div class="card card-warning">
+                    <h4>💰 Estimación Mensual (región East US)</h4>
+                    <div class="table-container">
+                        <table>
+                            <tr>
+                                <th>Recurso</th>
+                                <th>Configuración</th>
+                                <th>Costo Aprox/Mes</th>
+                            </tr>
+                            <tr>
+                                <td>AKS (nodos)</td>
+                                <td>2x Standard_B2s (2 vCPU, 4GB RAM)</td>
+                                <td>~$60 USD</td>
+                            </tr>
+                            <tr>
+                                <td>Azure Disk</td>
+                                <td>20GB Premium SSD</td>
+                                <td>~$3 USD</td>
+                            </tr>
+                            <tr>
+                                <td>LoadBalancer</td>
+                                <td>IP pública + tráfico</td>
+                                <td>~$5 USD</td>
+                            </tr>
+                            <tr>
+                                <td>ACR</td>
+                                <td>Basic tier</td>
+                                <td>~$5 USD</td>
+                            </tr>
+                            <tr>
+                                <td><strong>TOTAL</strong></td>
+                                <td></td>
+                                <td><strong>~$73 USD/mes</strong></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <p><small>* Los precios son aproximados y pueden variar según la región y uso real.</small></p>
+                </div>
+            </section>
+
+            <!-- Configuración -->
+            <section id="configuracion" class="section">
+                <h2>🔧 Configuración Post-Instalación</h2>
+
+                <h3>Crear SuperAdmin</h3>
+
+                <div class="card">
+                    <h4>En Servidor (Docker)</h4>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        <pre>docker-compose --env-file .env.docker exec flask_app python create_superadmin.py</pre>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h4>En Kubernetes</h4>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        <pre>kubectl exec -it deployment/flask-app -n rupturelakes -- python create_superadmin.py</pre>
+                    </div>
+                </div>
+
+                <h3>Configurar Firewall</h3>
+
+                <div class="card card-warning">
+                    <h4>Servidor Linux</h4>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        <pre># UFW (Ubuntu/Debian)
+sudo ufw allow 4500/tcp
+sudo ufw enable
+sudo ufw status
+
+# Firewalld (CentOS/RHEL)
+sudo firewall-cmd --permanent --add-port=4500/tcp
+sudo firewall-cmd --reload
+sudo firewall-cmd --list-all</pre>
+                    </div>
+                </div>
+
+                <div class="card card-warning">
+                    <h4>Azure (AKS)</h4>
+                    <p>Por defecto, el LoadBalancer de Azure ya tiene configurado el puerto 80.</p>
+                    <p>Si necesitas configurar reglas adicionales:</p>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        <pre># Ver Network Security Groups
+az network nsg list --resource-group MC_rupturelakes-rg_rupturelakes-aks_eastus
+
+# Agregar regla si es necesario
+az network nsg rule create \
+  --resource-group MC_rupturelakes-rg_rupturelakes-aks_eastus \
+  --nsg-name NSG_NAME \
+  --name AllowHTTP \
+  --priority 100 \
+  --source-address-prefixes '*' \
+  --destination-port-ranges 80 \
+  --access Allow \
+  --protocol Tcp</pre>
+                    </div>
+                </div>
+
+                <h3>Backup de MongoDB</h3>
+
+                <div class="card">
+                    <h4>Servidor (Docker)</h4>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        <pre># Crear backup
+docker-compose --env-file .env.docker exec mongodb_efigas mongodump \
+  --username admin \
+  --password TU_PASSWORD \
+  --authenticationDatabase admin \
+  --out /backup/$(date +%Y%m%d)
+
+# Copiar backup al host
+docker cp rupturelakes-mongodb:/backup ./backups/
+
+# Restaurar backup
+docker-compose --env-file .env.docker exec mongodb_efigas mongorestore \
+  --username admin \
+  --password TU_PASSWORD \
+  --authenticationDatabase admin \
+  /backup/20241117</pre>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h4>Kubernetes</h4>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        <pre># Crear backup
+kubectl exec -it statefulset/mongodb -n rupturelakes -- mongodump \
+  --username admin \
+  --password TU_PASSWORD \
+  --authenticationDatabase admin \
+  --out /backup/$(date +%Y%m%d)
+
+# Copiar backup a tu máquina local
+kubectl cp rupturelakes/mongodb-0:/backup ./backups/
+
+# Para backups automáticos, considera usar:
+# - Azure Backup
+# - Velero (backup de Kubernetes)
+# - CronJobs de Kubernetes</pre>
+                    </div>
+                </div>
+
+                <h3>Monitoreo y Logs</h3>
+
+                <div class="card card-info">
+                    <h4>Servidor (Docker)</h4>
+                    <p>Para producción, considera instalar:</p>
+                    <ul>
+                        <li><strong>Portainer</strong>: UI para gestionar contenedores</li>
+                        <li><strong>Prometheus + Grafana</strong>: Monitoreo y métricas</li>
+                        <li><strong>ELK Stack</strong>: Centralización de logs</li>
+                    </ul>
+                </div>
+
+                <div class="card card-info">
+                    <h4>Kubernetes (AKS)</h4>
+                    <p>Azure proporciona herramientas integradas:</p>
+                    <ul>
+                        <li><strong>Azure Monitor</strong>: Monitoreo de contenedores</li>
+                        <li><strong>Log Analytics</strong>: Análisis de logs</li>
+                        <li><strong>Application Insights</strong>: Telemetría de aplicaciones</li>
+                    </ul>
+
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        <pre># Habilitar Azure Monitor para contenedores
+az aks enable-addons \
+  --resource-group rupturelakes-rg \
+  --name rupturelakes-aks \
+  --addons monitoring</pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Troubleshooting -->
+            <section id="troubleshooting" class="section">
+                <h2>🔍 Solución de Problemas</h2>
+
+                <h3>Problemas Comunes en Servidor (Docker)</h3>
+
+                <div class="card card-danger">
+                    <h4>❌ Error: "Cannot connect to MongoDB"</h4>
+                    <p><strong>Solución:</strong></p>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        <pre># Verificar que MongoDB esté corriendo
+docker-compose --env-file .env.docker ps
+
+# Ver logs de MongoDB
+docker-compose --env-file .env.docker logs mongodb_efigas
+
+# Reiniciar MongoDB
+docker-compose --env-file .env.docker restart mongodb_efigas
+
+# Verificar variables de entorno
+docker-compose --env-file .env.docker exec flask_app env | grep MONGO</pre>
+                    </div>
+                </div>
+
+                <div class="card card-danger">
+                    <h4>❌ Error: "Port 4500 already in use"</h4>
+                    <p><strong>Solución:</strong></p>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        <pre># Ver qué proceso está usando el puerto
+sudo lsof -i :4500
+# o
+sudo netstat -tulpn | grep 4500
+
+# Matar el proceso
+sudo kill -9 PID
+
+# O cambiar el puerto en .env.docker
+FLASK_PORT=4501</pre>
+                    </div>
+                </div>
+
+                <div class="card card-danger">
+                    <h4>❌ Error: "Permission denied" al montar volúmenes</h4>
+                    <p><strong>Solución:</strong></p>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        <pre># Dar permisos a los directorios
+sudo chown -R $USER:$USER ./src
+sudo chown -R $USER:$USER ./mongo_data
+sudo chmod -R 755 ./src
+
+# O ejecutar Docker Compose con sudo
+sudo docker-compose --env-file .env.docker up -d</pre>
+                    </div>
+                </div>
+
+                <h3>Problemas Comunes en Kubernetes</h3>
+
+                <div class="card card-danger">
+                    <h4>❌ Pods en estado "CrashLoopBackOff"</h4>
+                    <p><strong>Solución:</strong></p>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        <pre># Ver logs del pod
+kubectl logs -f POD_NAME -n rupturelakes
+
+# Describir el pod para más detalles
+kubectl describe pod POD_NAME -n rupturelakes
+
+# Verificar eventos
+kubectl get events -n rupturelakes --sort-by='.lastTimestamp'
+
+# Verificar variables de entorno
+kubectl exec -it POD_NAME -n rupturelakes -- env</pre>
+                    </div>
+                </div>
+
+                <div class="card card-danger">
+                    <h4>❌ LoadBalancer sin IP externa (Pending)</h4>
+                    <p><strong>Solución:</strong></p>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        <pre># Esperar 2-3 minutos, puede tardar en asignarse
+
+# Verificar eventos del servicio
+kubectl describe service flask-service -n rupturelakes
+
+# Si sigue en pending después de 5 minutos, verificar cuota de IP en Azure
+az network public-ip list --resource-group MC_rupturelakes-rg_rupturelakes-aks_eastus
+
+# Como alternativa temporal, usar NodePort
+kubectl patch service flask-service -n rupturelakes -p '{"spec":{"type":"NodePort"}}'</pre>
+                    </div>
+                </div>
+
+                <div class="card card-danger">
+                    <h4>❌ Error: "ImagePullBackOff"</h4>
+                    <p><strong>Solución:</strong></p>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        <pre># Verificar que ACR esté adjunto al AKS
+az aks show --resource-group rupturelakes-rg --name rupturelakes-aks --query acrProfile
+
+# Si no está adjunto, adjuntar ACR
+az aks update \
+  --resource-group rupturelakes-rg \
+  --name rupturelakes-aks \
+  --attach-acr rupturelakesacr
+
+# Verificar que la imagen existe en ACR
+az acr repository show-tags --name rupturelakesacr --repository rupturelakes</pre>
+                    </div>
+                </div>
+
+                <h3>Verificaciones Generales</h3>
+
+                <div class="card">
+                    <h4>✅ Checklist de Diagnóstico</h4>
+                    <ul class="checklist">
+                        <li>¿Los contenedores/pods están corriendo?</li>
+                        <li>¿MongoDB está aceptando conexiones?</li>
+                        <li>¿Las credenciales en .env / secrets son correctas?</li>
+                        <li>¿Los puertos están abiertos en el firewall?</li>
+                        <li>¿Hay espacio suficiente en disco?</li>
+                        <li>¿Los logs muestran errores específicos?</li>
+                        <li>¿Las variables de entorno están correctamente configuradas?</li>
+                        <li>¿El DNS/networking está funcionando?</li>
+                    </ul>
+                </div>
+
+                <div class="card card-info">
+                    <h4>📞 Soporte</h4>
+                    <p>Si el problema persiste:</p>
+                    <ol>
+                        <li>Recopila los logs completos</li>
+                        <li>Documenta los pasos que causaron el error</li>
+                        <li>Verifica la versión de todos los componentes</li>
+                        <li>Contacta al equipo de desarrollo con la información anterior</li>
+                    </ol>
+                </div>
+            </section>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>RuptureLakes</strong> - Sistema de Gestión de Eventos de Ruptura</p>
+            <p>Desarrollado con ❤️ usando Flask + MongoDB</p>
+            <p>Versión 1.0 - Noviembre 2024</p>
+            <p style="margin-top: 20px;">
+                <a href="https://github.com/tu-organizacion/RuptureLakes" target="_blank">GitHub</a> |
+                <a href="#introduccion">Documentación</a> |
+                <a href="mailto:soporte@rupturelakes.com">Soporte</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Función para copiar código al portapapeles
+        function copyCode(button) {
+            const codeBlock = button.parentElement;
+            const code = codeBlock.querySelector('pre').textContent;
+
+            navigator.clipboard.writeText(code).then(() => {
+                const originalText = button.textContent;
+                button.textContent = '✓ Copiado';
+                button.style.background = '#28a745';
+
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = '#4CAF50';
+                }, 2000);
+            }).catch(err => {
+                console.error('Error al copiar:', err);
+                alert('Error al copiar el código. Por favor, cópialo manualmente.');
+            });
+        }
+
+        // Smooth scroll para navegación
+        document.querySelectorAll('.nav a').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+
+                if (targetSection) {
+                    targetSection.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Animación al hacer scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, {
+            threshold: 0.1
+        });
+
+        document.querySelectorAll('.section').forEach(section => {
+            section.style.opacity = '0';
+            section.style.transform = 'translateY(20px)';
+            section.style.transition = 'all 0.5s ease-in-out';
+            observer.observe(section);
+        });
+    </script>
+</body>
+</html>

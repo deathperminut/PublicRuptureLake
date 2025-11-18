@@ -1207,9 +1207,9 @@ def init_web_routes(app):
             [''],
             ['┌─ PASO 2: LLENAR TUS DATOS ────────────────────────────────────┐'],
             ['│ OPCIÓN A: Elimina las 3 filas de ejemplo y agrega tus datos   │'],
-            ['│ OPCIÓN B: Modifica los ejemplos cambiando:                     │'],
-            ['│   - Numero_Orden de 1, 2, 3 a tus números (ej: 100, 101, 102) │'],
-            ['│   - Los demás datos según tu evento real                       │'],
+            ['│ OPCIÓN B: Modifica los ejemplos con tus datos reales:         │'],
+            ['│   - Cambia las coordenadas GPS a tu ubicación real            │'],
+            ['│   - Modifica presión, diámetro y demás datos según tu evento  │'],
             ['│ • Usa las hojas "Opciones_Validas" y "Diametros_Comunes"      │'],
             ['└────────────────────────────────────────────────────────────────┘'],
             [''],
@@ -1222,9 +1222,9 @@ def init_web_routes(app):
             ['════════════════════ CAMPOS OBLIGATORIOS ═════════════════════════'],
             [''],
             ['📍 Numero_Orden: Número único del evento'],
-            ['   ✓ Usar números enteros: 4, 5, 10, 100, 1001, etc.'],
-            ['   ✗ No usar: 1, 2, 3 (son ejemplos y se omitirán automáticamente)'],
-            ['   ⚠  Comienza desde el número 4 en adelante para tus eventos reales'],
+            ['   ✓ Usar números enteros: 1, 2, 3, 4, 5, 10, 100, 1001, etc.'],
+            ['   ✓ Puedes usar cualquier número entero positivo'],
+            ['   ℹ️  Las filas con texto "EJEMPLO" o "CAMBIAR" se omitirán automáticamente'],
             [''],
             ['📍 Latitud y Longitud: Coordenadas GPS del evento'],
             ['   ✓ Usar Google Maps para obtenerlas'],
@@ -1313,12 +1313,12 @@ def init_web_routes(app):
             ['✓ Usa punto (.) para decimales, NO coma: 4.5 en vez de 4,5'],
             ['✓ Revisa las hojas "Opciones_Validas" y "Diametros_Comunes"'],
             ['✓ Cada Numero_Orden debe ser ÚNICO (no repetir)'],
-            ['✓ Usa números enteros para Numero_Orden: 4, 5, 6, 10, 100, 1001, etc.'],
-            ['✓ Puedes ELIMINAR las 3 filas de ejemplo (1, 2, 3) y agregar las tuyas'],
-            ['✓ O puedes MODIFICAR los ejemplos cambiando Numero_Orden a 4+ y los datos'],
+            ['✓ Usa números enteros para Numero_Orden: 1, 2, 3, 4, 5, 10, 100, 1001, etc.'],
+            ['✓ Puedes ELIMINAR las 3 filas de ejemplo y agregar las tuyas'],
+            ['✓ O puedes MODIFICAR los ejemplos con tus datos reales'],
             ['✓ Puedes copiar y pegar filas para crear eventos similares'],
             ['✓ Los cálculos complejos (flujo, volumen, etc.) se hacen automáticamente'],
-            ['✓ Las filas con Numero_Orden = 1, 2, 3 se omiten automáticamente'],
+            ['✓ Las filas con texto "EJEMPLO" o "CAMBIAR" se omiten automáticamente'],
             ['✗ NO cambiar los nombres de las columnas'],
             ['✗ NO dejar filas completamente vacías entre eventos'],
             [''],
@@ -1380,6 +1380,229 @@ def init_web_routes(app):
         if campo in mapeos and str(valor) in mapeos[campo]:
             return mapeos[campo][str(valor)]
         return valor
+
+    def validar_y_preparar_evento(form_data):
+        """
+        Valida y prepara un evento SIN insertarlo en la base de datos.
+
+        Validaciones:
+        - Numero_Orden: SIEMPRE obligatorio, único, y válido
+        - Resto de campos: Opcionales, pero si tienen valor deben ser válidos
+
+        Returns:
+            {
+                'valido': True/False,
+                'skip': True/False (para filas de ejemplo),
+                'evento_data': {...} si es válido,
+                'error': "mensaje" si es inválido
+            }
+        """
+        try:
+            # ===== VALIDACIÓN 1: NUMERO DE ORDEN (SIEMPRE OBLIGATORIO) =====
+            orden = form_data.get('Numero_Orden', '').strip() if isinstance(form_data.get('Numero_Orden', ''), str) else str(form_data.get('Numero_Orden', ''))
+
+            # Verificar que no esté vacío
+            if not orden or orden == '' or orden == 'nan':
+                return {'valido': False, 'error': 'Numero_Orden es obligatorio y no puede estar vacío'}
+
+            # Verificar que sea un número entero válido
+            try:
+                orden_int = int(float(orden))
+                if orden_int <= 0:
+                    return {'valido': False, 'error': f'Numero_Orden debe ser un número positivo (recibido: {orden})'}
+                orden = str(orden_int)
+            except (ValueError, TypeError):
+                return {'valido': False, 'error': f'Numero_Orden debe ser un número entero (recibido: {orden})'}
+
+            # Detectar filas de ejemplo (se omiten, no es error)
+            # SOLO omitir si el texto empieza con EJEMPLO o CAMBIAR
+            orden_str = str(orden).upper()
+            if (orden_str.startswith('EJEMPLO') or
+                orden_str.startswith('CAMBIAR')):
+                return {'valido': True, 'skip': True, 'mensaje': f'Fila de ejemplo omitida: {orden}'}
+
+            # ===== EXTRACCIÓN Y VALIDACIÓN DE CAMPOS OPCIONALES =====
+
+            def validar_campo_texto(nombre_campo, valores_permitidos):
+                """Valida campo categórico opcional"""
+                valor = form_data.get(nombre_campo, '').strip() if isinstance(form_data.get(nombre_campo, ''), str) else str(form_data.get(nombre_campo, ''))
+                if valor and valor != '' and valor != 'nan':
+                    if valor not in valores_permitidos:
+                        return {'valido': False, 'error': f'{nombre_campo} "{valor}" no es válido. Valores permitidos: {", ".join(valores_permitidos)}'}
+                return {'valido': True}
+
+            def validar_campo_numerico(nombre_campo, min_val=None, max_val=None, debe_ser_positivo=False):
+                """Valida campo numérico opcional"""
+                valor = form_data.get(nombre_campo, '').strip() if isinstance(form_data.get(nombre_campo, ''), str) else str(form_data.get(nombre_campo, ''))
+                if valor and valor != '' and valor != 'nan':
+                    try:
+                        num_val = float(valor)
+                        if debe_ser_positivo and num_val <= 0:
+                            return {'valido': False, 'error': f'{nombre_campo} debe ser un número positivo (recibido: {valor})'}
+                        if min_val is not None and num_val < min_val:
+                            return {'valido': False, 'error': f'{nombre_campo} debe ser mayor o igual a {min_val} (recibido: {valor})'}
+                        if max_val is not None and num_val > max_val:
+                            return {'valido': False, 'error': f'{nombre_campo} debe ser menor o igual a {max_val} (recibido: {valor})'}
+                    except (ValueError, TypeError):
+                        return {'valido': False, 'error': f'{nombre_campo} debe ser un número (recibido: {valor})'}
+                return {'valido': True}
+
+            def validar_campo_entero(nombre_campo, min_val=None, max_val=None):
+                """Valida campo entero opcional"""
+                valor = form_data.get(nombre_campo, '').strip() if isinstance(form_data.get(nombre_campo, ''), str) else str(form_data.get(nombre_campo, ''))
+                if valor and valor != '' and valor != 'nan':
+                    try:
+                        int_val = int(float(valor))
+                        if min_val is not None and int_val < min_val:
+                            return {'valido': False, 'error': f'{nombre_campo} debe estar entre {min_val}-{max_val} (recibido: {valor})'}
+                        if max_val is not None and int_val > max_val:
+                            return {'valido': False, 'error': f'{nombre_campo} debe estar entre {min_val}-{max_val} (recibido: {valor})'}
+                    except (ValueError, TypeError):
+                        return {'valido': False, 'error': f'{nombre_campo} debe ser un número entero (recibido: {valor})'}
+                return {'valido': True}
+
+            # Validar coordenadas GPS
+            resultado = validar_campo_numerico('Latitud', min_val=-90, max_val=90)
+            if not resultado['valido']:
+                return resultado
+
+            resultado = validar_campo_numerico('Longitud', min_val=-180, max_val=180)
+            if not resultado['valido']:
+                return resultado
+
+            # Validar presión
+            resultado = validar_campo_numerico('Presion_Tuberia', debe_ser_positivo=True)
+            if not resultado['valido']:
+                return resultado
+
+            resultado = validar_campo_texto('Unidad_Presion', ['psig', 'bar', 'kPa'])
+            if not resultado['valido']:
+                return resultado
+
+            # Validar diámetro
+            resultado = validar_campo_numerico('Diametro_Tuberia_Pulgadas', debe_ser_positivo=True)
+            if not resultado['valido']:
+                return resultado
+
+            # Validar campos categóricos
+            resultado = validar_campo_texto('Ubicacion_Tuberia', ['Subterránea', 'Superficial'])
+            if not resultado['valido']:
+                return resultado
+
+            resultado = validar_campo_texto('Direccion_Flujo', ['Unidireccional', 'Bidireccional'])
+            if not resultado['valido']:
+                return resultado
+
+            resultado = validar_campo_texto('Tipo_Ruptura', ['Circular', 'Recta', 'Rectangular', 'Triangular', 'Total'])
+            if not resultado['valido']:
+                return resultado
+
+            resultado = validar_campo_texto('Unidad_Medida_Ruptura', ['mm', 'in'])
+            if not resultado['valido']:
+                return resultado
+
+            resultado = validar_campo_texto('Usar_Diametro_Equivalente', ['SI', 'NO'])
+            if not resultado['valido']:
+                return resultado
+
+            resultado = validar_campo_texto('Tipo_Escape', ['Mínimo', 'Parcial', 'Total'])
+            if not resultado['valido']:
+                return resultado
+
+            # Validar medida de ruptura
+            resultado = validar_campo_numerico('Medida_Ruptura', debe_ser_positivo=True)
+            if not resultado['valido']:
+                return resultado
+
+            # Validar distancias
+            resultado = validar_campo_numerico('Distancia_Valvula_1_m', debe_ser_positivo=True)
+            if not resultado['valido']:
+                return resultado
+
+            resultado = validar_campo_numerico('Distancia_Valvula_2_m', debe_ser_positivo=True)
+            if not resultado['valido']:
+                return resultado
+
+            # Validar fechas
+            resultado = validar_campo_entero('Año_Inicio', min_val=1900, max_val=2100)
+            if not resultado['valido']:
+                return resultado
+
+            resultado = validar_campo_entero('Mes_Inicio', min_val=1, max_val=12)
+            if not resultado['valido']:
+                return resultado
+
+            resultado = validar_campo_entero('Dia_Inicio', min_val=1, max_val=31)
+            if not resultado['valido']:
+                return resultado
+
+            resultado = validar_campo_entero('Hora_Inicio', min_val=0, max_val=23)
+            if not resultado['valido']:
+                return resultado
+
+            resultado = validar_campo_entero('Minuto_Inicio', min_val=0, max_val=59)
+            if not resultado['valido']:
+                return resultado
+
+            resultado = validar_campo_entero('Año_Fin', min_val=1900, max_val=2100)
+            if not resultado['valido']:
+                return resultado
+
+            resultado = validar_campo_entero('Mes_Fin', min_val=1, max_val=12)
+            if not resultado['valido']:
+                return resultado
+
+            resultado = validar_campo_entero('Dia_Fin', min_val=1, max_val=31)
+            if not resultado['valido']:
+                return resultado
+
+            resultado = validar_campo_entero('Hora_Fin', min_val=0, max_val=23)
+            if not resultado['valido']:
+                return resultado
+
+            resultado = validar_campo_entero('Minuto_Fin', min_val=0, max_val=59)
+            if not resultado['valido']:
+                return resultado
+
+            # ===== VALIDACIÓN DE REGLAS DE NEGOCIO =====
+
+            # Regla 1: Si Direccion_Flujo es Bidireccional, Distancia_Valvula_2_m no puede estar vacía
+            direccion_raw = form_data.get('Direccion_Flujo', '').strip() if isinstance(form_data.get('Direccion_Flujo', ''), str) else str(form_data.get('Direccion_Flujo', ''))
+            distancia_2 = form_data.get('Distancia_Valvula_2_m', '').strip() if isinstance(form_data.get('Distancia_Valvula_2_m', ''), str) else str(form_data.get('Distancia_Valvula_2_m', ''))
+
+            if direccion_raw == 'Bidireccional':
+                if not distancia_2 or distancia_2 == '' or distancia_2 == 'nan':
+                    return {'valido': False, 'error': 'Direccion_Flujo es Bidireccional pero falta Distancia_Valvula_2_m'}
+
+            # Regla 2: Si Tipo_Ruptura es Total, Medida_Ruptura debe estar vacía
+            forma_raw = form_data.get('Tipo_Ruptura', '').strip() if isinstance(form_data.get('Tipo_Ruptura', ''), str) else str(form_data.get('Tipo_Ruptura', ''))
+            medida_ruptura = form_data.get('Medida_Ruptura', '').strip() if isinstance(form_data.get('Medida_Ruptura', ''), str) else str(form_data.get('Medida_Ruptura', ''))
+
+            if forma_raw == 'Total':
+                if medida_ruptura and medida_ruptura != '' and medida_ruptura != 'nan':
+                    return {'valido': False, 'error': 'Tipo_Ruptura "Total" no debe tener Medida_Ruptura. Déjalo vacío'}
+
+            # Regla 3: Si Usar_Diametro_Equivalente es SI, Tipo_Escape no puede estar vacío
+            usar_equiv_raw = form_data.get('Usar_Diametro_Equivalente', '').strip() if isinstance(form_data.get('Usar_Diametro_Equivalente', ''), str) else str(form_data.get('Usar_Diametro_Equivalente', ''))
+            escape_raw = form_data.get('Tipo_Escape', '').strip() if isinstance(form_data.get('Tipo_Escape', ''), str) else str(form_data.get('Tipo_Escape', ''))
+
+            if usar_equiv_raw == 'SI':
+                if not escape_raw or escape_raw == '' or escape_raw == 'nan':
+                    return {'valido': False, 'error': 'Usar_Diametro_Equivalente "SI" requiere especificar Tipo_Escape (Mínimo, Parcial o Total)'}
+
+            # Si llegamos aquí, la validación básica pasó
+            # Ahora llamamos a la función original para preparar el evento (sin insertar)
+            resultado = procesar_evento_desde_excel(form_data)
+
+            if resultado['status'] == 'exito':
+                return {'valido': True, 'evento_data': resultado['evento_data']}
+            elif resultado['status'] == 'skip':
+                return {'valido': True, 'skip': True, 'mensaje': resultado.get('error', 'Fila omitida')}
+            else:
+                return {'valido': False, 'error': resultado['error']}
+
+        except Exception as e:
+            return {'valido': False, 'error': f'Error inesperado en validación: {str(e)}'}
 
     def procesar_evento_desde_excel(form_data):
         """Procesar un evento usando los mismos cálculos que /Resultados con nuevo formato"""
@@ -1445,20 +1668,15 @@ def init_web_routes(app):
             except (ValueError, TypeError) as e:
                 return {'status': 'error', 'error': f'Error en formato de fecha/hora: {str(e)}. Verifica que todos los campos de fecha sean números válidos'}
 
-            # Validaciones básicas
-            campos_vacios = []
-            if not orden: campos_vacios.append('Numero_Orden')
-            if not ubicacion or latitud == '' or longitud == '': campos_vacios.append('Latitud/Longitud')
-            if not presionTub: campos_vacios.append('Presion_Tuberia')
-            if not Tdiametro: campos_vacios.append('Diametro_Tuberia_Pulgadas')
-
-            if campos_vacios:
-                return {'status': 'error', 'error': f'Campos obligatorios faltantes: {", ".join(campos_vacios)}'}
+            # Validación básica: SOLO Numero_Orden es obligatorio
+            # Todos los demás campos son opcionales según los nuevos requerimientos
+            if not orden:
+                return {'status': 'error', 'error': 'Numero_Orden es obligatorio'}
 
             # Validación especial para ejemplos (solo omitir filas claramente marcadas como ejemplo)
+            # SOLO omitir si el texto empieza con EJEMPLO o CAMBIAR
             orden_str = str(orden).upper()
-            # Omitir ejemplos: números 1, 2, 3 o texto que empiece con EJEMPLO/CAMBIAR
-            if orden_str.startswith('EJEMPLO') or orden_str.startswith('CAMBIAR') or orden in [1, 2, 3, '1', '2', '3']:
+            if orden_str.startswith('EJEMPLO') or orden_str.startswith('CAMBIAR'):
                 return {'status': 'skip', 'error': f'Fila de ejemplo omitida: {orden}'}
             
             # Conversiones de tipos (misma lógica que /Resultados)
@@ -1634,45 +1852,39 @@ def init_web_routes(app):
                 'diame_equi': escape if equi == "on" else 'no',
                 'aprobado': 'no'
             }
-            
-            # Guardar en base de datos
-            response = createEvent(evento_data)
-            
-            if response.get('status') == 'Orden creada con éxito':
-                return {'status': 'exito'}
-            else:
-                # Manejar específicamente el error de orden duplicada
-                error_msg = response.get('status', 'Error desconocido')
-                if 'éxiste una orden registrada' in error_msg:
-                    error_msg = f'La orden "{orden}" ya existe. Usa un número único diferente'
-                return {'status': 'error', 'error': error_msg}
+
+            # NO insertar en base de datos, solo retornar el objeto preparado
+            return {'status': 'exito', 'evento_data': evento_data}
                 
         except Exception as e:
             return {'status': 'error', 'error': str(e)}
 
     @app.route('/ProcesarCargaMasiva', methods=['POST'])
     def procesar_carga_masiva():
-        """Procesar carga masiva usando lógica del formulario"""
+        """Procesar carga masiva con validación en dos fases (validar todo primero, insertar después)"""
         # Verificar que el usuario sea SuperAdmin o worker
         user_rol = request.cookies.get('rol')
         if user_rol not in ['SuperAdmin', 'worker']:
             return {'error': 'No autorizado'}, 403
-        
+
         if 'archivo' not in request.files:
             return {'error': 'No se encontró archivo'}, 400
-        
+
         archivo = request.files['archivo']
         if archivo.filename == '':
             return {'error': 'Archivo vacío'}, 400
-        
+
         try:
             # Leer el archivo Excel
             df = pd.read_excel(archivo, sheet_name='Eventos')
-            
-            eventos_creados = 0
-            eventos_fallidos = 0
+
+            # ===== FASE 1: VALIDAR TODOS LOS EVENTOS (sin insertar) =====
+            eventos_validados = []
             eventos_omitidos = 0
-            errores = []
+            errores_validacion = []
+            ordenes_validadas = []
+
+            print(f"=== INICIANDO VALIDACIÓN DE {len(df)} FILAS ===")
 
             for index, row in df.iterrows():
                 try:
@@ -1685,33 +1897,166 @@ def init_web_routes(app):
                     for col in df.columns:
                         form_data[col] = '' if pd.isna(row[col]) else str(row[col])
 
-                    # Procesar usando la misma lógica que /Resultados
-                    resultado = procesar_evento_desde_excel(form_data)
+                    # DEBUG: Imprimir datos de la fila para diagnóstico
+                    if index + 2 == 4:  # Fila 4 en Excel
+                        print(f"=== DEBUG FILA 4 ===")
+                        print(f"Numero_Orden: [{form_data.get('Numero_Orden')}]")
+                        print(f"Latitud: [{form_data.get('Latitud')}]")
+                        print(f"Longitud: [{form_data.get('Longitud')}]")
+                        print(f"Latitud vacía: {form_data.get('Latitud') == ''}")
+                        print(f"Longitud vacía: {form_data.get('Longitud') == ''}")
 
-                    if resultado['status'] == 'exito':
-                        eventos_creados += 1
-                    elif resultado['status'] == 'skip':
+                    # Validar usando la nueva función (NO inserta)
+                    resultado = validar_y_preparar_evento(form_data)
+
+                    if resultado.get('skip'):
+                        # Fila de ejemplo omitida
                         eventos_omitidos += 1
-                        # No reportar como error las filas de ejemplo
+                        print(f"Fila {index + 2}: {resultado.get('mensaje', 'Omitida')}")
+                    elif resultado['valido']:
+                        # Evento válido, guardarlo en lista temporal
+                        eventos_validados.append(resultado['evento_data'])
+                        ordenes_validadas.append(resultado['evento_data']['orden'])
+                        print(f"Fila {index + 2}: ✓ Válido (Orden: {resultado['evento_data']['orden']})")
                     else:
-                        eventos_fallidos += 1
-                        errores.append(f"Fila {index + 2} ({row.get('Numero_Orden', 'Sin orden')}): {resultado['error']}")
+                        # Evento inválido
+                        error_msg = f"Fila {index + 2} (Orden: {row.get('Numero_Orden', 'Sin orden')}): {resultado['error']}"
+                        errores_validacion.append(error_msg)
+                        print(f"Fila {index + 2}: ✗ ERROR - {resultado['error']}")
 
                 except Exception as e:
-                    eventos_fallidos += 1
-                    errores.append(f"Fila {index + 2} ({row.get('Numero_Orden', 'Sin orden')}): {str(e)}")
-            
-            # Log para debugging
-            print(f"Carga masiva completada: {eventos_creados} creados, {eventos_fallidos} fallidos, {eventos_omitidos} omitidos")
-            for error in errores[:5]:  # Mostrar primeros 5 errores en consola
-                print(f"Error: {error}")
+                    error_msg = f"Fila {index + 2} (Orden: {row.get('Numero_Orden', 'Sin orden')}): Error inesperado - {str(e)}"
+                    errores_validacion.append(error_msg)
+                    print(f"Fila {index + 2}: ✗ EXCEPCIÓN - {str(e)}")
 
+            # ===== VALIDACIÓN ADICIONAL: Órdenes duplicadas en el archivo =====
+            ordenes_duplicadas_archivo = [orden for orden in ordenes_validadas if ordenes_validadas.count(orden) > 1]
+            if ordenes_duplicadas_archivo:
+                ordenes_unicas = list(set(ordenes_duplicadas_archivo))
+                for orden in ordenes_unicas:
+                    errores_validacion.append(f"ARCHIVO: Numero_Orden '{orden}' aparece duplicado en múltiples filas")
+
+            # ===== VALIDACIÓN ADICIONAL: Órdenes que ya existen en la base de datos =====
+            if ordenes_validadas:
+                try:
+                    from functions.conect import getDataBase
+                    db = getDataBase()
+
+                    # DEBUG: Ver qué tipos estamos buscando
+                    print(f"=== DEBUG VALIDACIÓN DUPLICADOS ===")
+                    print(f"Órdenes a validar (type): {[(o, type(o).__name__) for o in ordenes_validadas[:3]]}")
+
+                    # Buscar con AMBOS tipos: string y numérico (int/float)
+                    # Convertir cada orden a múltiples formatos para asegurar coincidencia
+                    ordenes_busqueda = []
+                    for orden in ordenes_validadas:
+                        ordenes_busqueda.append(orden)  # String original
+                        try:
+                            # Intentar convertir a int
+                            ordenes_busqueda.append(int(orden))
+                        except (ValueError, TypeError):
+                            pass
+                        try:
+                            # Intentar convertir a float
+                            ordenes_busqueda.append(float(orden))
+                        except (ValueError, TypeError):
+                            pass
+
+                    print(f"Órdenes a buscar (multiformato): {ordenes_busqueda[:9]}")
+
+                    # Buscar si alguna de las órdenes validadas ya existe en la BD
+                    eventos_existentes_cursor = db['events'].find(
+                        {'orden': {'$in': ordenes_busqueda}},
+                        {'orden': 1, '_id': 0}
+                    )
+                    # Convertir cursor a lista
+                    ordenes_db_raw = [evento['orden'] for evento in eventos_existentes_cursor]
+
+                    print(f"Órdenes encontradas en BD (type): {[(o, type(o).__name__) for o in ordenes_db_raw]}")
+
+                    # Convertir todas las órdenes de BD a string para comparación
+                    ordenes_db_str = [str(o) for o in ordenes_db_raw]
+
+                    # Verificar cuáles de nuestras órdenes validadas están duplicadas
+                    for orden_validada in ordenes_validadas:
+                        if orden_validada in ordenes_db_str:
+                            errores_validacion.append(f"BASE DE DATOS: Numero_Orden '{orden_validada}' ya existe en la base de datos")
+
+                except Exception as e:
+                    print(f"Advertencia: No se pudo verificar duplicados en BD: {str(e)}")
+                    import traceback
+                    traceback.print_exc()
+                    # No detener el proceso por este error, solo registrarlo
+
+            print(f"=== VALIDACIÓN COMPLETADA ===")
+            print(f"Eventos validados: {len(eventos_validados)}")
+            print(f"Eventos omitidos: {eventos_omitidos}")
+            print(f"Errores encontrados: {len(errores_validacion)}")
+
+            # ===== FASE 2: SI HAY ERRORES, ABORTAR (no insertar nada) =====
+            if errores_validacion:
+                print(f"❌ ABORTANDO: Se encontraron {len(errores_validacion)} errores. NO se insertó nada.")
+                for i, error in enumerate(errores_validacion[:5], 1):
+                    print(f"  Error {i}: {error}")
+
+                return {
+                    'exito': False,
+                    'eventos_creados': 0,
+                    'eventos_validados': len(eventos_validados),
+                    'eventos_fallidos': len(errores_validacion),
+                    'eventos_omitidos': eventos_omitidos,
+                    'errores': errores_validacion,  # Retornar TODOS los errores
+                    'mensaje': f'⚠️ Se encontraron {len(errores_validacion)} errores. NO se guardó ningún evento en la base de datos.'
+                }
+
+            # ===== FASE 3: SI TODO ES VÁLIDO, INSERTAR TODOS LOS EVENTOS =====
+            print(f"✅ VALIDACIÓN EXITOSA: Insertando {len(eventos_validados)} eventos...")
+
+            eventos_insertados = 0
+            errores_insercion = []
+
+            for evento_data in eventos_validados:
+                try:
+                    response = createEvent(evento_data)
+                    if response.get('status') == 'Orden creada con éxito':
+                        eventos_insertados += 1
+                        print(f"  ✓ Insertado: {evento_data['orden']}")
+                    else:
+                        error_msg = f"Orden {evento_data['orden']}: {response.get('status', 'Error desconocido')}"
+                        errores_insercion.append(error_msg)
+                        print(f"  ✗ Error insertando {evento_data['orden']}: {response.get('status')}")
+                except Exception as e:
+                    error_msg = f"Orden {evento_data['orden']}: Error inesperado - {str(e)}"
+                    errores_insercion.append(error_msg)
+                    print(f"  ✗ Excepción insertando {evento_data['orden']}: {str(e)}")
+
+            print(f"=== INSERCIÓN COMPLETADA ===")
+            print(f"Eventos insertados: {eventos_insertados}")
+            print(f"Errores de inserción: {len(errores_insercion)}")
+
+            # Si hubo errores en la inserción (no debería pasar si la validación fue correcta)
+            if errores_insercion:
+                return {
+                    'exito': False,
+                    'eventos_creados': eventos_insertados,
+                    'eventos_validados': len(eventos_validados),
+                    'eventos_fallidos': len(errores_insercion),
+                    'eventos_omitidos': eventos_omitidos,
+                    'errores': errores_insercion,
+                    'mensaje': f'⚠️ Se insertaron {eventos_insertados} eventos pero {len(errores_insercion)} fallaron durante la inserción.'
+                }
+
+            # Todo exitoso
             return {
-                'eventos_creados': eventos_creados,
-                'eventos_fallidos': eventos_fallidos,
+                'exito': True,
+                'eventos_creados': eventos_insertados,
+                'eventos_validados': len(eventos_validados),
+                'eventos_fallidos': 0,
                 'eventos_omitidos': eventos_omitidos,
-                'errores': errores[:10]  # Limitar a 10 errores para no sobrecargar
+                'errores': [],
+                'mensaje': f'✅ Todos los eventos fueron validados e insertados exitosamente ({eventos_insertados} eventos).'
             }
-            
+
         except Exception as e:
+            print(f"ERROR CRÍTICO: {str(e)}")
             return {'error': f'Error procesando archivo: {str(e)}'}, 500

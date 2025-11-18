@@ -327,69 +327,124 @@
         .then(response => response.json())
         .then(data => {
           clearInterval(progressInterval);
-          
+
           // Complete progress
           progressBar.style.width = '100%';
           progressBar.textContent = '100%';
           progressText.textContent = 'Completado';
-          
+
           setTimeout(() => {
             document.getElementById('progressContainer').style.display = 'none';
             document.getElementById('resultContainer').style.display = 'block';
-            
+
             const resultAlert = document.getElementById('resultAlert');
             const resultIcon = document.getElementById('resultIcon');
             const resultTitle = document.getElementById('resultTitle');
             const resultText = document.getElementById('resultText');
             const errorDetails = document.getElementById('errorDetails');
             const errorList = document.getElementById('errorList');
-            
-            // Determinar el tipo de resultado
-            const omitidos = data.eventos_omitidos || 0;
-            let mensaje = '';
 
-            if (data.eventos_fallidos === 0) {
-              // Todo exitoso
-              resultAlert.className = 'alert alert-success';
-              resultIcon.className = 'fas fa-check-circle';
-              resultTitle.textContent = 'Carga Completada Exitosamente';
-              mensaje = `Se procesaron exitosamente ${data.eventos_creados} eventos.`;
-              if (omitidos > 0) {
-                mensaje += ` (${omitidos} filas de ejemplo omitidas)`;
-              }
-              resultText.textContent = mensaje;
-            } else if (data.eventos_creados === 0) {
-              // Todo falló
+            // Debug: Ver qué datos llegan
+            console.log('Datos recibidos del servidor:', data);
+
+            // Manejar error crítico del servidor
+            if (data.error) {
               resultAlert.className = 'alert alert-danger';
               resultIcon.className = 'fas fa-exclamation-triangle';
-              resultTitle.textContent = 'Error en la Carga';
-              mensaje = `Ningún evento pudo procesarse. ${data.eventos_fallidos} eventos fallaron.`;
+              resultTitle.textContent = '❌ ERROR DEL SERVIDOR';
+              resultText.textContent = data.error;
+              uploadBtn.disabled = false;
+              return;
+            }
+
+            // Determinar el tipo de resultado con nuevo comportamiento de validación en dos fases
+            const omitidos = data.eventos_omitidos || 0;
+            const validados = data.eventos_validados || 0;
+            const creados = data.eventos_creados || 0;
+            const fallidos = data.eventos_fallidos || 0;
+            let mensaje = '';
+
+            if (data.exito === false && creados === 0) {
+              // VALIDACIÓN FALLIDA - NO se insertó nada
+              resultAlert.className = 'alert alert-danger';
+              resultIcon.className = 'fas fa-times-circle';
+              resultTitle.textContent = '❌ VALIDACIÓN FALLIDA - NO SE GUARDÓ NADA';
+
+              mensaje = `Se encontraron ${fallidos} errores en el archivo.\n\n`;
+              mensaje += `✓ ${validados} eventos pasaron la validación\n`;
+              mensaje += `✗ ${fallidos} eventos tienen errores\n`;
               if (omitidos > 0) {
-                mensaje += ` (${omitidos} filas de ejemplo omitidas)`;
+                mensaje += `ℹ️  ${omitidos} filas de ejemplo fueron omitidas\n`;
               }
+              mensaje += `\n⚠️ IMPORTANTE: Ningún evento fue insertado en la base de datos.\n`;
+              mensaje += `Corrige los errores y vuelve a subir el archivo completo.`;
+
+              resultText.style.whiteSpace = 'pre-line';
+              resultText.textContent = mensaje;
+            } else if (data.exito === true && fallidos === 0) {
+              // TODO EXITOSO - Todos insertados
+              resultAlert.className = 'alert alert-success';
+              resultIcon.className = 'fas fa-check-circle';
+              resultTitle.textContent = '✅ CARGA EXITOSA - TODOS LOS EVENTOS FUERON GUARDADOS';
+
+              mensaje = `✓ ${validados} eventos validados correctamente\n`;
+              mensaje += `✓ ${creados} eventos insertados en la base de datos\n`;
+              if (omitidos > 0) {
+                mensaje += `ℹ️  ${omitidos} filas de ejemplo fueron omitidas\n`;
+              }
+              mensaje += `✗ 0 errores encontrados\n\n`;
+              mensaje += `Todos los eventos están listos para ser revisados.`;
+
+              resultText.style.whiteSpace = 'pre-line';
               resultText.textContent = mensaje;
             } else {
-              // Éxito parcial
+              // Caso inesperado (no debería ocurrir con validación en dos fases)
               resultAlert.className = 'alert alert-warning';
-              resultIcon.className = 'fas fa-exclamation-circle';
-              resultTitle.textContent = 'Carga Completada con Errores';
-              mensaje = `Se procesaron ${data.eventos_creados} eventos exitosamente y ${data.eventos_fallidos} eventos fallaron.`;
+              resultIcon.className = 'fas fa-exclamation-triangle';
+              resultTitle.textContent = '⚠️ RESULTADO PARCIAL';
+
+              mensaje = `Eventos creados: ${creados}\n`;
+              mensaje += `Eventos validados: ${validados}\n`;
+              mensaje += `Eventos con errores: ${fallidos}\n`;
               if (omitidos > 0) {
-                mensaje += ` (${omitidos} filas de ejemplo omitidas)`;
+                mensaje += `Eventos omitidos: ${omitidos}\n`;
               }
+              mensaje += `\n${data.mensaje || 'Proceso completado con resultados mixtos.'}`;
+
+              resultText.style.whiteSpace = 'pre-line';
               resultText.textContent = mensaje;
             }
-            
+
             // Mostrar errores si los hay
             if (data.errores && data.errores.length > 0) {
               errorDetails.style.display = 'block';
               errorList.innerHTML = '';
-              data.errores.forEach(error => {
+
+              // Mensaje adicional si hay muchos errores
+              if (data.errores.length > 20) {
+                const warningLi = document.createElement('li');
+                warningLi.className = 'text-warning fw-bold';
+                warningLi.textContent = `⚠️ Se encontraron ${data.errores.length} errores. Mostrando los primeros 20:`;
+                errorList.appendChild(warningLi);
+              }
+
+              // Mostrar máximo 20 errores
+              data.errores.slice(0, 20).forEach(error => {
                 const li = document.createElement('li');
                 li.className = 'text-danger';
+                li.style.fontSize = '0.9em';
+                li.style.marginBottom = '5px';
                 li.textContent = error;
                 errorList.appendChild(li);
               });
+
+              // Si hay más errores, mostrar mensaje
+              if (data.errores.length > 20) {
+                const moreLi = document.createElement('li');
+                moreLi.className = 'text-muted fst-italic';
+                moreLi.textContent = `... y ${data.errores.length - 20} errores más. Revisa la consola del servidor para ver todos.`;
+                errorList.appendChild(moreLi);
+              }
             }
             
             uploadBtn.disabled = false;
